@@ -3,11 +3,13 @@
 ## Goal and Background
 
 This prepository is a show case of LLMops practices on databricks in context of an organized course.
-The repository of the teachers is availabe in the ../course-code-hub/
+The repository of the teachers is availabe in the ../course-code-hub/ directory
 
 We will largely follow the guidance of the teachers repository which gets updated regularly with the new code examples from the completed lessons.
-We will use a slightly different use case that still needs to be determined, i.e. we will liely use different data than the arxiv data if we find a suitable source.
-Until then, we can follow that code pretty much verbatim. Since this is an educative project, most prompts will strive towards understanding and learnign of the owner of the current repository.
+
+Our use case will be a homework buddy: we provide lecture notes and hoemwork. The goal is to provide the relevant references to solve the homework.
+
+Still we use the content provided by the course teachers as inspiration and as a learning resource to understand what has changed.
 
 ## Development Environment
 
