@@ -24,7 +24,7 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from arxiv_curator.config import get_env, load_config
+from commons.config import get_env, load_config
 
 # COMMAND ----------
 # Create Spark session and load config
