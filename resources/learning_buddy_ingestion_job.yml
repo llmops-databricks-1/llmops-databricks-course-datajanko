@@ -1,0 +1,23 @@
+resources:
+  jobs:
+    learning_buddy_ingestion_job:
+      name: learning_buddy_ingestion
+      tags:
+        project_name: "learning-buddy"
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+
+      tasks:
+        - task_key: learning_buddy_ingestion
+          environment_key: default
+          notebook_task:
+            notebook_path: ../notebooks/1.5_learning_buddy_ingestion.py
+            base_parameters:
+              env: ${bundle.target}
+              git_sha: "${var.git_sha}"
+              run_id: "{{job.run_id}}"
