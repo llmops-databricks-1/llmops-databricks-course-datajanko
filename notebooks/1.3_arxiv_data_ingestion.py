@@ -7,7 +7,7 @@ from loguru import logger
 from pyspark.sql import SparkSession
 from pyspark.sql.types import ArrayType, LongType, StringType, StructField, StructType
 
-from your_custom_package.config import get_env, load_config
+from arxiv_curator.config import get_env, load_config
 
 # COMMAND ----------
 # Create Spark session
