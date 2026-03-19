@@ -35,8 +35,14 @@
 
 # COMMAND ----------
 
+import base64
+from io import BytesIO
+
 import mlflow.deployments
+from databricks.sdk import WorkspaceClient
 from loguru import logger
+from openai import OpenAI
+from PIL import Image
 
 # Get MLflow Deployments client
 client = mlflow.deployments.get_deploy_client("databricks")
@@ -56,20 +62,22 @@ except Exception:
     endpoint = client.create_endpoint(
         name=ENDPOINT_NAME,
         config={
-            "served_entities": [{
-                "name": "dalle-image-generation",
-                "external_model": {
-                    "name": "dall-e-3",
-                    "provider": "openai",
-                    "task": "llm/v1/images",  # Image generation task type
-                    "openai_config": {
-                        "openai_api_key": "{{secrets/llmops_course/openai_key}}",
-                        "openai_api_base": "https://api.openai.com/v1",
-                        "openai_api_type": "openai"
-                    }
+            "served_entities": [
+                {
+                    "name": "dalle-image-generation",
+                    "external_model": {
+                        "name": "dall-e-3",
+                        "provider": "openai",
+                        "task": "llm/v1/images",  # Image generation task type
+                        "openai_config": {
+                            "openai_api_key": "{{secrets/llmops_course/openai_key}}",
+                            "openai_api_base": "https://api.openai.com/v1",
+                            "openai_api_type": "openai",
+                        },
+                    },
                 }
-            }]
-        }
+            ]
+        },
     )
 
     logger.info(f"Endpoint created successfully: {ENDPOINT_NAME}")
@@ -84,13 +92,6 @@ except Exception:
 
 # COMMAND ----------
 
-from databricks.sdk import WorkspaceClient
-from openai import OpenAI
-import base64
-from io import BytesIO
-from PIL import Image
-import json
-
 w = WorkspaceClient()
 
 # Authenticate using Databricks SDK
@@ -98,10 +99,7 @@ host = w.config.host
 token = w.tokens.create(lifetime_seconds=1200).token_value
 
 # Create OpenAI client pointing to Databricks endpoint
-client = OpenAI(
-    api_key=token,
-    base_url=f"{host.rstrip('/')}/serving-endpoints"
-)
+client = OpenAI(api_key=token, base_url=f"{host.rstrip('/')}/serving-endpoints")
 
 ENDPOINT_NAME = "openai-dalle-custom"
 
@@ -125,7 +123,7 @@ response = client.images.generate(
     n=1,  # Number of images to generate
     style="vivid",  # Options: "vivid" or "natural"
     quality="standard",  # Options: "standard" or "hd"
-    response_format="b64_json"  # Returns base64-encoded image
+    response_format="b64_json",  # Returns base64-encoded image
 )
 
 logger.info("Image generated successfully!")
@@ -145,7 +143,7 @@ image_bytes = base64.b64decode(image_data)
 image = Image.open(BytesIO(image_bytes))
 
 # Display in notebook
-display(image)
+display(image)  # noqa: F821
 
 # Optionally save to file
 # image.save("/dbfs/tmp/generated_image.png")
@@ -166,7 +164,7 @@ response_url = client.images.generate(
     n=1,
     style="vivid",
     quality="standard",
-    response_format="url"  # Returns temporary URL
+    response_format="url",  # Returns temporary URL
 )
 
 image_url = response_url.data[0].url

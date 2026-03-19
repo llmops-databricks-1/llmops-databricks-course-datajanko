@@ -70,22 +70,24 @@ bielefeld_materials = [
 
 # Add Bielefeld homework sets 0-6
 for hw_num in range(7):
-    bielefeld_materials.append({
-        "material_id": f"bielefeld_a1_hw{hw_num}",
-        "course": "bielefeld_a1",
-        "document_type": "homework",
-        "language": "de",
-        "title": f"Analysis 1 - Homework Set {hw_num}",
-        "url": f"https://www.math.uni-bielefeld.de/~grigor/a1b{hw_num}.pdf",
-        "homework_set_number": hw_num,
-        "authors": None,
-        "description": f"Homework assignment set {hw_num} for Analysis 1",
-        "source_url": "https://www.math.uni-bielefeld.de/~grigor/a1ws2024-25.htm",
-        "ingestion_timestamp": ingestion_timestamp,
-        "processed": None,
-        "volume_path": None,
-        "metadata": None,
-    })
+    bielefeld_materials.append(
+        {
+            "material_id": f"bielefeld_a1_hw{hw_num}",
+            "course": "bielefeld_a1",
+            "document_type": "homework",
+            "language": "de",
+            "title": f"Analysis 1 - Homework Set {hw_num}",
+            "url": f"https://www.math.uni-bielefeld.de/~grigor/a1b{hw_num}.pdf",
+            "homework_set_number": hw_num,
+            "authors": None,
+            "description": f"Homework assignment set {hw_num} for Analysis 1",
+            "source_url": "https://www.math.uni-bielefeld.de/~grigor/a1ws2024-25.htm",
+            "ingestion_timestamp": ingestion_timestamp,
+            "processed": None,
+            "volume_path": None,
+            "metadata": None,
+        }
+    )
 
 # MIT Real Analysis (English)
 mit_materials = [
@@ -109,22 +111,24 @@ mit_materials = [
 
 # Add MIT homework assignments 1-12
 for hw_num in range(1, 13):
-    mit_materials.append({
-        "material_id": f"mit_18_100a_hw{hw_num}",
-        "course": "mit_18_100a",
-        "document_type": "homework",
-        "language": "en",
-        "title": f"Real Analysis - Homework {hw_num}",
-        "url": f"https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw{hw_num}.pdf",
-        "homework_set_number": hw_num,
-        "authors": None,
-        "description": f"Homework assignment {hw_num} for 18.100A Real Analysis",
-        "source_url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
-        "ingestion_timestamp": ingestion_timestamp,
-        "processed": None,
-        "volume_path": None,
-        "metadata": None,
-    })
+    mit_materials.append(
+        {
+            "material_id": f"mit_18_100a_hw{hw_num}",
+            "course": "mit_18_100a",
+            "document_type": "homework",
+            "language": "en",
+            "title": f"Real Analysis - Homework {hw_num}",
+            "url": f"https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw{hw_num}.pdf",
+            "homework_set_number": hw_num,
+            "authors": None,
+            "description": f"Homework assignment {hw_num} for 18.100A Real Analysis",
+            "source_url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes-and-readings/",
+            "ingestion_timestamp": ingestion_timestamp,
+            "processed": None,
+            "volume_path": None,
+            "metadata": None,
+        }
+    )
 
 # Combine all materials
 all_materials = bielefeld_materials + mit_materials
@@ -137,22 +141,24 @@ logger.info(f"  - MIT: {len(mit_materials)} documents")
 # Create Delta table schema
 # Columns designed with future extensibility in mind for PDF extraction, chunking, embeddings
 
-schema = StructType([
-    StructField("material_id", StringType(), False),
-    StructField("course", StringType(), False),
-    StructField("document_type", StringType(), False),
-    StructField("language", StringType(), False),
-    StructField("title", StringType(), False),
-    StructField("url", StringType(), False),
-    StructField("homework_set_number", IntegerType(), True),
-    StructField("authors", ArrayType(StringType()), True),
-    StructField("description", StringType(), True),
-    StructField("source_url", StringType(), True),
-    StructField("ingestion_timestamp", StringType(), False),
-    StructField("processed", LongType(), True),
-    StructField("volume_path", StringType(), True),
-    StructField("metadata", StringType(), True),
-])
+schema = StructType(
+    [
+        StructField("material_id", StringType(), False),
+        StructField("course", StringType(), False),
+        StructField("document_type", StringType(), False),
+        StructField("language", StringType(), False),
+        StructField("title", StringType(), False),
+        StructField("url", StringType(), False),
+        StructField("homework_set_number", IntegerType(), True),
+        StructField("authors", ArrayType(StringType()), True),
+        StructField("description", StringType(), True),
+        StructField("source_url", StringType(), True),
+        StructField("ingestion_timestamp", StringType(), False),
+        StructField("processed", LongType(), True),
+        StructField("volume_path", StringType(), True),
+        StructField("metadata", StringType(), True),
+    ]
+)
 
 # COMMAND ----------
 # Create DataFrame and write to Delta table
@@ -161,11 +167,7 @@ df = spark.createDataFrame(all_materials, schema=schema)
 
 full_table_name = f"{CATALOG}.{SCHEMA}.{TABLE_NAME}"
 
-df.write \
-    .format("delta") \
-    .mode("overwrite") \
-    .option("mergeSchema", "true") \
-    .saveAsTable(full_table_name)
+df.write.format("delta").mode("overwrite").option("mergeSchema", "true").saveAsTable(full_table_name)
 
 logger.info(f"Successfully wrote {len(all_materials)} materials to {full_table_name}")
 
@@ -189,7 +191,7 @@ by_type = spark.sql(f"""
     ORDER BY document_type
 """)
 
-logger.info(f"Ingestion complete!")
+logger.info("Ingestion complete!")
 logger.info(f"Total records: {total_count}")
 logger.info("By course:")
 for row in by_course.collect():
@@ -200,5 +202,5 @@ for row in by_type.collect():
     logger.info(f"  {row['document_type']}: {row['count']}")
 
 # Display summary
-display(by_course)
-display(by_type)
+display(by_course)  # noqa: F821
+display(by_type)  # noqa: F821
