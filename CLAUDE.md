@@ -1,17 +1,27 @@
 # LLMOps Course on Databricks — Project Guidelines
 
+## Goal and Background
+
+This prepository is a show case of LLMops practices on databricks in context of an organized course.
+The repository of the teachers is availabe in the ../course-code-hub/ directory
+
+We will largely follow the guidance of the teachers repository which gets updated regularly with the new code examples from the completed lessons.
+
+Our use case will be a homework buddy: we provide lecture notes and hoemwork. The goal is to provide the relevant references to solve the homework.
+
+Still we use the content provided by the course teachers as inspiration and as a learning resource to understand what has changed.
+
 ## Development Environment
 
 This project uses `uv` for dependency management and running tools.
 Python **3.12** is required (matches Databricks Serverless Environment 4).
-
 ### Running Commands
 
 **ALWAYS use `uv run` prefix for all Python tools:**
 
 ```bash
 # Linting, formatting
-uv run pre-commit run --all-files
+uv run prek run --all-files
 
 # Running tests
 uv run pytest
@@ -26,7 +36,6 @@ llmops-databricks-course-datajanko/
 ├── .github/
 │   └── workflows/ci.yml
 ├── notebooks/              # Databricks-format notebooks
-│   └── hello_world.py
 ├── resources/              # Databricks Asset Bundle job definitions (*.yml)
 ├── tests/
 ├── databricks.yml          # Databricks Asset Bundle configuration
@@ -47,7 +56,6 @@ llmops-databricks-course-datajanko/
 **Optional / dev dependencies**: use `>=X.Y.Z,<NEXT_MAJOR`.
 ```toml
 "pytest>=8.3.4,<9"
-"pre-commit>=4.1.0,<5"
 ```
 
 ### Packages That Must Always Be Optional

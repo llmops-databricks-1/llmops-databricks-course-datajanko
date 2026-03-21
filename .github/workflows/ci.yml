@@ -34,9 +34,9 @@ jobs:
         run: |
           uv sync --extra ci
 
-      - name: Run pre-commit checks
+      - name: Run prek checks
         run: |
-          uv run pre-commit run --all-files
+          uv run prek run --all-files
 
       - name: run pytest
         run: |
