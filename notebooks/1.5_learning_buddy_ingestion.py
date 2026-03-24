@@ -31,7 +31,7 @@ from commons.config import get_env, load_config
 spark = SparkSession.builder.getOrCreate()
 
 env = get_env(spark)
-cfg = load_config("../project_config.yml", env)
+cfg = load_config("../learning_buddy_config.yml", env)
 
 CATALOG = cfg.catalog
 SCHEMA = cfg.schema

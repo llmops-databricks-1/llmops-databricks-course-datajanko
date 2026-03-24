@@ -15,7 +15,7 @@ spark = SparkSession.builder.getOrCreate()
 
 # Load config
 env = get_env(spark)
-cfg = load_config("../project_config.yml", env)
+cfg = load_config("../arxiv_config.yml", env)
 
 CATALOG = cfg.catalog
 SCHEMA = cfg.schema
