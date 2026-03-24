@@ -1,0 +1,22 @@
+resources:
+  jobs:
+    setup_learning_buddy_volumes_job:
+      name: setup_learning_buddy_volumes
+      tags:
+        project_name: "llmops-databricks-course"
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+
+      tasks:
+        - task_key: setup_volumes
+          environment_key: default
+          notebook_task:
+            notebook_path: ../notebooks/0_setup_volumes.py
+            base_parameters:
+              config_path: ../learning_buddy_config.yml
+              env: ${bundle.target}
