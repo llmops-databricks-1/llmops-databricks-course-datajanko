@@ -9,25 +9,24 @@
 # MAGIC - Storing parsed content in Delta tables
 
 # COMMAND ----------
-
-# %pip install ../llmops_databricks_course_datajanko-0.0.1-py3-none-any.whl
-
+#%pip install ../arxiv_curator-0.1.0-py3-none-any.whl
 # COMMAND ----------
 
-from databricks.connect import DatabricksSession
 from loguru import logger
+from databricks.connect import DatabricksSession
 
-from arxiv_curator.config import get_env, load_config
+from arxiv_curator.config import load_config, get_env
 from arxiv_curator.data_processor import DataProcessor
 
 # COMMAND ----------
 
 spark = DatabricksSession.builder.getOrCreate()
-logger.info("Using Databricks Connect Spark session")
+logger.info("✅ Using Databricks Connect Spark session")
 
 env = get_env(spark)
-cfg = load_config("../arxiv_config.yml", env)
+cfg = load_config("arxiv_config.yml", env)
 
+# Initialize the DataProcessor (reusable class from arxiv_curator package)
 processor = DataProcessor(spark=spark, config=cfg)
 
 logger.info(f"Catalog: {cfg.catalog}, Schema: {cfg.schema}, Volume: {cfg.volume}")

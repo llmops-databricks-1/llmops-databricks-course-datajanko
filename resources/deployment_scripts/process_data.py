@@ -52,4 +52,4 @@ processor.process_and_save()
 vs_manager = VectorSearchManager(config=cfg)
 vs_manager.sync_index()
 
-logger.info("Data processing pipeline complete!")
+logger.info("✓ Data processing pipeline complete!")

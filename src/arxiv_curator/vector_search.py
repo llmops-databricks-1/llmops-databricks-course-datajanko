@@ -2,10 +2,11 @@
 
 from typing import Any
 
-from databricks.vector_search.client import VectorSearchClient
 from loguru import logger
 
-from commons.config import ProjectConfig
+from databricks.vector_search.client import VectorSearchClient
+
+from arxiv_curator.config import ProjectConfig
 
 
 class VectorSearchManager:
@@ -39,27 +40,21 @@ class VectorSearchManager:
     def create_endpoint_if_not_exists(self) -> None:
         """Create vector search endpoint if it doesn't exist."""
         endpoints_response = self.client.list_endpoints()
-        endpoints = (
-            endpoints_response.get("endpoints", [])
-            if isinstance(endpoints_response, dict)
-            else []
-        )
+        endpoints = endpoints_response.get("endpoints", []) if isinstance(endpoints_response, dict) else []
         endpoint_exists = any(
-            (ep.get("name") if isinstance(ep, dict) else getattr(ep, "name", None))
-            == self.endpoint_name
+            (ep.get("name") if isinstance(ep, dict) else getattr(ep, "name", None)) == self.endpoint_name
             for ep in endpoints
         )
 
         if not endpoint_exists:
             logger.info(f"Creating vector search endpoint: {self.endpoint_name}")
             self.client.create_endpoint_and_wait(
-                name=self.endpoint_name,
-                endpoint_type="STANDARD",
-                usage_policy_id=self.usage_policy_id,
+                name=self.endpoint_name, endpoint_type="STANDARD",
+                usage_policy_id=self.usage_policy_id
             )
-            logger.info(f"Vector search endpoint created: {self.endpoint_name}")
+            logger.info(f"✓ Vector search endpoint created: {self.endpoint_name}")
         else:
-            logger.info(f"Vector search endpoint exists: {self.endpoint_name}")
+            logger.info(f"✓ Vector search endpoint exists: {self.endpoint_name}")
 
     def create_or_get_index(self) -> Any:
         """Create or get vector search index.
@@ -70,13 +65,15 @@ class VectorSearchManager:
         self.create_endpoint_if_not_exists()
         source_table = f"{self.catalog}.{self.schema}.arxiv_chunks_table"
 
+        # Try to get existing index
         try:
             index = self.client.get_index(index_name=self.index_name)
-            logger.info(f"Vector search index exists: {self.index_name}")
+            logger.info(f"✓ Vector search index exists: {self.index_name}")
             return index
         except Exception:
             logger.info(f"Index {self.index_name} not found, will create it")
 
+        # Try to create the index
         try:
             index = self.client.create_delta_sync_index(
                 endpoint_name=self.endpoint_name,
@@ -86,14 +83,15 @@ class VectorSearchManager:
                 primary_key="id",
                 embedding_source_column="text",
                 embedding_model_endpoint_name=self.embedding_model,
-                usage_policy_id=self.usage_policy_id,
+                usage_policy_id=self.usage_policy_id
             )
-            logger.info(f"Vector search index created: {self.index_name}")
+            logger.info(f"✓ Vector search index created: {self.index_name}")
             return index
         except Exception as e:
             if "RESOURCE_ALREADY_EXISTS" not in str(e):
                 raise
-            logger.info(f"Vector search index exists: {self.index_name}")
+            # Index exists but get_index failed earlier (transient) — retry
+            logger.info(f"✓ Vector search index exists: {self.index_name}")
             return self.client.get_index(index_name=self.index_name)
 
     def sync_index(self) -> None:
@@ -101,21 +99,21 @@ class VectorSearchManager:
         index = self.create_or_get_index()
         logger.info(f"Syncing vector search index: {self.index_name}")
         index.sync()
-        logger.info("Index sync triggered")
+        logger.info("✓ Index sync triggered")
 
     def search(
         self,
         query: str,
         num_results: int = 5,
-        filters: dict | None = None,
+        filters: dict | None = None
     ) -> dict:
         """Search the vector index.
-
+        
         Args:
             query: Search query text
             num_results: Number of results to return
             filters: Optional filters to apply
-
+            
         Returns:
             Search results dictionary
         """
@@ -124,6 +122,6 @@ class VectorSearchManager:
             query_text=query,
             columns=["id", "text", "metadata"],
             num_results=num_results,
-            filters=filters,
+            filters=filters
         )
         return results

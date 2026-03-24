@@ -80,7 +80,6 @@ def estimate_tokens(text: str) -> int:
     """Rough estimation: ~4 characters per token."""
     return len(text) // 4
 
-
 # Example texts
 short_text = "Hello, world!"
 long_text = "This is a much longer piece of text that would be used in a real application. " * 100
@@ -140,22 +139,28 @@ logger.info(f"Approximate words: {available_for_context * 0.75:,.0f}")
 
 # COMMAND ----------
 
-from databricks.sdk import WorkspaceClient
+# Example: Query rewriting for better retrieval
 from openai import OpenAI
+from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
+# Authenticate using Databricks SDK
 host = w.config.host
 token = w.tokens.create(lifetime_seconds=1200).token_value
 
-client = OpenAI(api_key=token, base_url=f"{host.rstrip('/')}/serving-endpoints")
+client = OpenAI(
+    api_key=token,
+    base_url=f"{host.rstrip('/')}/serving-endpoints"
+)
 
-MODEL_NAME = "databricks-llama-4-maverick"
+# Use an available model from your workspace
+MODEL_NAME = "databricks-llama-4-maverick"  # Change to match your available models
 logger.info(f"Using model: {MODEL_NAME}")
-
 
 def rewrite_query(original_query: str) -> list[str]:
     """Generate query variations for better retrieval."""
+    
     prompt = f"""Given this search query, generate 3 alternative phrasings that would help retrieve relevant information:
 
 Original query: {original_query}
@@ -171,15 +176,14 @@ Return only the 3 variations, one per line."""
         model=MODEL_NAME,
         messages=[{"role": "user", "content": prompt}],
         max_tokens=200,
-        temperature=0.7,
+        temperature=0.7
     )
-
-    variations = response.choices[0].message.content.strip().split("\n")
+    
+    variations = response.choices[0].message.content.strip().split('\n')
     return [v.strip() for v in variations if v.strip()]
 
-
 # Example
-original = "How do I solve this real analysis homework problem?"
+original = "How do I deploy a model in Databricks?"
 variations = rewrite_query(original)
 
 logger.info(f"Original: {original}\n")
@@ -209,24 +213,29 @@ for i, var in enumerate(variations, 1):
 # Example: Context ordering strategies
 def order_context_by_relevance(chunks: list[dict]) -> list[dict]:
     """Order chunks to avoid 'lost in the middle' problem.
-
+    
     Strategy: Most relevant at start, second-most at end, rest in middle.
     """
     if len(chunks) <= 2:
         return chunks
-
+    
+    # Assume chunks are already sorted by relevance score
     ordered = []
+    
+    # Most relevant at start
     ordered.append(chunks[0])
-
+    
+    # Least relevant in middle
     if len(chunks) > 2:
         ordered.extend(chunks[2:-1])
-
+    
+    # Second most relevant at end
     if len(chunks) > 1:
         ordered.append(chunks[1])
-
+    
     return ordered
 
-
+# Example chunks (with mock relevance scores)
 chunks = [
     {"text": "Most relevant chunk", "score": 0.95},
     {"text": "Second most relevant", "score": 0.88},
@@ -259,9 +268,9 @@ for i, chunk in enumerate(ordered, 1):
 
 # COMMAND ----------
 
-
 def summarize_chunk(text: str, max_length: int = 100) -> str:
     """Summarize a text chunk using LLM."""
+    
     prompt = f"""Summarize the following text in {max_length} words or less, preserving key information:
 
 {text}
@@ -271,19 +280,22 @@ Summary:"""
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[{"role": "user", "content": prompt}],
-        max_tokens=max_length * 2,
-        temperature=0.3,
+        max_tokens=max_length * 2,  # Rough token estimate
+        temperature=0.3
     )
-
+    
     return response.choices[0].message.content.strip()
 
-
+# Example
 long_text = """
-Real analysis is a branch of mathematical analysis dealing with the real numbers
-and real-valued functions of a real variable. In particular, it deals with the
-analytic properties of real functions and sequences, including convergence and
-limits of sequences of real numbers, the calculus of the real numbers, and
-continuity, smoothness and related properties of real-valued functions.
+Databricks is a unified analytics platform that combines data engineering, 
+data science, and machine learning. It provides a collaborative environment 
+for data teams to work together on big data and AI projects. The platform 
+is built on top of Apache Spark and offers features like Delta Lake for 
+reliable data lakes, MLflow for machine learning lifecycle management, 
+and Unity Catalog for unified governance. Databricks supports multiple 
+programming languages including Python, SQL, R, and Scala, making it 
+accessible to various types of data professionals.
 """
 
 summary = summarize_chunk(long_text, max_length=50)
@@ -310,31 +322,32 @@ logger.info(f"\nSummary:\n{summary}")
 # MAGIC
 # MAGIC Enhance retrieval with metadata filters:
 # MAGIC
-# MAGIC - **Course filters**: Bielefeld vs MIT materials
-# MAGIC - **Document type**: lecture notes vs homework assignments
-# MAGIC - **Language**: German (de) vs English (en)
-# MAGIC - **Homework set number**: specific assignment
+# MAGIC - **Date filters**: Recent documents only
+# MAGIC - **Source filters**: Specific departments/teams
+# MAGIC - **Type filters**: Documentation vs code vs discussions
+# MAGIC - **Access control**: User permissions
+# MAGIC - **Language**: Specific languages
 
 # COMMAND ----------
 
-import json
-
-# Example: Metadata structure for learning buddy
+# Example: Metadata structure
 example_document = {
-    "id": "bielefeld_a1_hw3_chunk_001",
-    "text": "Content of the homework chunk...",
+    "id": "doc_123",
+    "text": "Content of the document...",
     "embedding": [0.1, 0.2, 0.3],  # Vector embedding
     "metadata": {
-        "material_id": "bielefeld_a1_hw3",
-        "course": "bielefeld_a1",
-        "document_type": "homework",
-        "language": "de",
-        "title": "Analysis 1 - Homework Set 3",
-        "homework_set_number": 3,
-    },
+        "source": "documentation",
+        "date": "2024-01-15",
+        "author": "data-team",
+        "department": "engineering",
+        "language": "en",
+        "tags": ["databricks", "mlops", "deployment"],
+        "access_level": "internal"
+    }
 }
 
 logger.info("Example document with metadata:")
+import json
 logger.info(json.dumps(example_document, indent=2))
 
 # COMMAND ----------
@@ -345,28 +358,28 @@ logger.info(json.dumps(example_document, indent=2))
 # MAGIC ### Effective RAG Prompts
 # MAGIC
 # MAGIC ```
-# MAGIC System: You are a helpful homework buddy assistant. Use the provided
-# MAGIC lecture notes and homework context to help students understand how to
-# MAGIC approach their assignments. If the answer is not in the context,
+# MAGIC System: You are a helpful assistant. Use the provided context 
+# MAGIC to answer questions. If the answer is not in the context, 
 # MAGIC say "I don't have enough information to answer that."
 # MAGIC
 # MAGIC Context:
 # MAGIC [Retrieved documents here]
 # MAGIC
-# MAGIC Question: [Student question]
+# MAGIC Question: [User question]
 # MAGIC
 # MAGIC Answer:
 # MAGIC ```
 
 # COMMAND ----------
 
-
 def create_rag_prompt(query: str, context_chunks: list[str]) -> str:
     """Create a RAG prompt with context."""
-    context = "\n\n".join(
-        [f"[Document {i + 1}]\n{chunk}" for i, chunk in enumerate(context_chunks)]
-    )
-
+    
+    context = "\n\n".join([
+        f"[Document {i+1}]\n{chunk}" 
+        for i, chunk in enumerate(context_chunks)
+    ])
+    
     prompt = f"""Use the following context to answer the question. If the answer is not in the context, say "I don't have enough information to answer that."
 
 Context:
@@ -375,14 +388,14 @@ Context:
 Question: {query}
 
 Answer:"""
-
+    
     return prompt
 
-
-query = "What is the definition of a convergent sequence?"
+# Example
+query = "What is Databricks?"
 context_chunks = [
-    "A sequence (a_n) is said to converge to a limit L if for every epsilon > 0 there exists N such that |a_n - L| < epsilon for all n > N.",
-    "Convergence is a fundamental concept in real analysis and is used throughout calculus.",
+    "Databricks is a unified analytics platform for data engineering and data science.",
+    "The platform is built on Apache Spark and provides collaborative notebooks.",
 ]
 
 prompt = create_rag_prompt(query, context_chunks)
@@ -409,7 +422,7 @@ logger.info(prompt)
 # MAGIC %md
 # MAGIC ## 10. Best Practices Summary
 # MAGIC
-# MAGIC ### Do:
+# MAGIC ### ✅ Do:
 # MAGIC 1. Chunk documents appropriately (more in next notebook)
 # MAGIC 2. Use high-quality embeddings
 # MAGIC 3. Implement metadata filtering
@@ -418,9 +431,10 @@ logger.info(prompt)
 # MAGIC 6. Provide clear instructions in prompts
 # MAGIC 7. Handle cases where context doesn't contain the answer
 # MAGIC
-# MAGIC ### Don't:
+# MAGIC ### ❌ Don't:
 # MAGIC 1. Exceed context window limits
 # MAGIC 2. Include irrelevant information
 # MAGIC 3. Ignore the "lost in the middle" problem
 # MAGIC 4. Forget to cite sources
 # MAGIC 5. Assume all retrieved docs are relevant
+
