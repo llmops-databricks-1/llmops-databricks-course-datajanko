@@ -1,0 +1,19 @@
+resources:
+  jobs:
+    reset_learning_buddy_tables_job:
+      name: reset_learning_buddy_tables
+      tags:
+        project_name: "llmops-databricks-course-datajanko"
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+      tasks:
+        - task_key: reset_tables
+          environment_key: default
+          notebook_task:
+            notebook_path: deployment_scripts/reset_learning_buddy_tables.py
+            base_parameters:
+              env: ${bundle.target}

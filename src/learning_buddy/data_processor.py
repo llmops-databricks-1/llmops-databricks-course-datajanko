@@ -1,27 +1,31 @@
 """Document processor for the Learning Buddy use case."""
 
 import re
+from pathlib import Path
 
+import requests
+import yaml
 from loguru import logger
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, current_timestamp, udf
 from pyspark.sql.types import ArrayType, StringType, StructField, StructType
 
-from commons.config import ProjectConfig
+from learning_buddy.config import LearningBuddyProjectConfig
 
 
 class LearningBuddyDocumentProcessor:
     """Processes learning materials from volume into searchable chunks.
 
     Implements the DocumentProcessor protocol:
-      run() → _parse_documents() → _process_chunks() → marks processed=true
+      run() → _sync_courses() → _download_materials() → _parse_documents()
+             → _process_chunks() → _mark_processed()
     """
 
-    def __init__(self, config: ProjectConfig) -> None:
+    def __init__(self, config: LearningBuddyProjectConfig) -> None:
         """Initialize with project configuration.
 
         Args:
-            config: ProjectConfig with catalog, schema, volume settings
+            config: LearningBuddyProjectConfig with catalog, schema, volume, courses_path
         """
         self.cfg = config
         self.catalog = config.catalog
@@ -34,9 +38,135 @@ class LearningBuddyDocumentProcessor:
 
     def run(self) -> None:
         """Run the full processing pipeline."""
+        self._sync_courses()
+        self._download_materials()
         self._parse_documents()
         self._process_chunks()
         self._mark_processed()
+
+    def _resolve_courses_path(self) -> Path:
+        """Resolve courses_path using 3-level parent search from cwd."""
+        courses_path = self.cfg.courses_path
+        p = Path(courses_path)
+        if p.is_absolute():
+            return p
+        current = Path.cwd()
+        for _ in range(3):
+            candidate = current / courses_path
+            if candidate.exists():
+                return candidate
+            current = current.parent
+        raise FileNotFoundError(
+            f"courses YAML not found: {courses_path} (searched from {Path.cwd()})"
+        )
+
+    def _sync_courses(self) -> None:
+        """Sync courses from YAML into learning_materials table.
+
+        Reads courses_path YAML, builds rows from contents + exercises,
+        creates the table if it doesn't exist, then MERGEs new rows in.
+        Existing rows (including processed=true) are left untouched.
+        """
+        courses_file = self._resolve_courses_path()
+        with open(courses_file) as f:
+            data = yaml.safe_load(f)
+
+        rows = []
+        for course in data.get("courses", []):
+            course_id = course["id"]
+            language = course.get("language", "")
+            source_url = course.get("source_url", "")
+
+            for item in course.get("contents", []) + course.get("exercises", []):
+                rows.append({
+                    "material_id": item["material_id"],
+                    "course": course_id,
+                    "language": language,
+                    "source_url": source_url,
+                    "document_type": item.get("document_type", ""),
+                    "title": item.get("title", ""),
+                    "url": item.get("url", ""),
+                    "description": item.get("description", ""),
+                })
+
+        logger.info(f"Loaded {len(rows)} materials from {courses_file}")
+
+        # Create table with BooleanType for processed
+        self.spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS {self.materials_table} (
+                material_id STRING NOT NULL,
+                course STRING,
+                language STRING,
+                source_url STRING,
+                document_type STRING,
+                title STRING,
+                url STRING,
+                description STRING,
+                volume_path STRING,
+                processed BOOLEAN
+            )
+        """)
+
+        if not rows:
+            logger.warning("No materials found in courses YAML — nothing to sync")
+            return
+
+        new_df = self.spark.createDataFrame(rows)
+        new_df.createOrReplaceTempView("courses_source")
+
+        self.spark.sql(f"""
+            MERGE INTO {self.materials_table} target
+            USING courses_source source
+            ON target.material_id = source.material_id
+            WHEN NOT MATCHED THEN INSERT (
+                material_id, course, language, source_url,
+                document_type, title, url, description,
+                volume_path, processed
+            ) VALUES (
+                source.material_id, source.course, source.language, source.source_url,
+                source.document_type, source.title, source.url, source.description,
+                NULL, NULL
+            )
+        """)
+
+        logger.info(f"Synced materials into {self.materials_table}")
+
+    def _download_materials(self) -> None:
+        """Download PDFs for unprocessed materials to the Databricks volume.
+
+        Queries learning_materials WHERE processed IS NULL OR processed = false,
+        downloads each PDF to /Volumes/{catalog}/{schema}/{volume}/{material_id}.pdf,
+        and updates volume_path on success.
+        """
+        unprocessed = self.spark.sql(f"""
+            SELECT material_id, url
+            FROM {self.materials_table}
+            WHERE (processed IS NULL OR processed = false)
+              AND url IS NOT NULL AND url != ''
+        """).collect()
+
+        logger.info(f"Downloading {len(unprocessed)} PDFs")
+
+        volume_base = f"/Volumes/{self.catalog}/{self.schema}/{self.cfg.volume}"
+
+        for row in unprocessed:
+            material_id = row["material_id"]
+            url = row["url"]
+            dest_path = f"{volume_base}/{material_id}.pdf"
+
+            try:
+                response = requests.get(url, timeout=60)
+                response.raise_for_status()
+                with open(dest_path, "wb") as f:
+                    f.write(response.content)
+                self.spark.sql(f"""
+                    UPDATE {self.materials_table}
+                    SET volume_path = '{dest_path}'
+                    WHERE material_id = '{material_id}'
+                """)
+                logger.info(f"Downloaded {material_id} → {dest_path}")
+            except Exception as e:
+                logger.warning(f"Failed to download {material_id} from {url}: {e}")
 
     def _parse_documents(self) -> None:
         """Parse PDFs from volume using ai_parse_document.

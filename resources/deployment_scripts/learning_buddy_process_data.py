@@ -15,7 +15,8 @@
 from loguru import logger
 from pyspark.sql import SparkSession
 
-from commons.config import get_env, load_config
+from commons.config import get_env
+from learning_buddy.config import LearningBuddyProjectConfig
 from learning_buddy.data_processor import LearningBuddyDocumentProcessor
 from learning_buddy.vector_search import LearningBuddyVectorSearchManager
 
@@ -24,7 +25,7 @@ from learning_buddy.vector_search import LearningBuddyVectorSearchManager
 spark = SparkSession.builder.getOrCreate()
 
 env = get_env(spark)
-cfg = load_config("../../learning_buddy_config.yml", env=env)
+cfg = LearningBuddyProjectConfig.load(config_path="learning_buddy_config.yml", env=env)
 
 logger.info("Configuration loaded:")
 logger.info(f"  Environment: {env}")

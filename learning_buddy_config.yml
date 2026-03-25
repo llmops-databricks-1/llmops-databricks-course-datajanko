@@ -10,6 +10,7 @@ dev:
   warehouse_id: 7077f4cb0e616c62
   vector_search_endpoint: llmops_course_vs_endpoint
   genie_space_id: 01f113061bf41578baff744a41bd9ab0
+  courses_path: learning_buddy_courses.yml
 
 # Acceptance/Staging environment
 acc:
@@ -21,6 +22,7 @@ acc:
   warehouse_id: 7077f4cb0e616c62
   vector_search_endpoint: llmops_course_vs_endpoint
   genie_space_id: 01f113061bf41578baff744a41bd9ab0
+  courses_path: learning_buddy_courses.yml
 
 # Production environment
 prd:
@@ -32,6 +34,7 @@ prd:
   warehouse_id: 7077f4cb0e616c62
   vector_search_endpoint: llmops_course_vs_endpoint
   genie_space_id: 01f113061bf41578baff744a41bd9ab0
+  courses_path: learning_buddy_courses.yml
 
 # Model configuration
 model_config:

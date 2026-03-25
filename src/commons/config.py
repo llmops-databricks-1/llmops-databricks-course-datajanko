@@ -60,6 +60,28 @@ class ProjectConfig(BaseModel):
 
         return cls(**config_data[env])
 
+    @classmethod
+    def load(cls, config_path: str = "project_config.yml", env: str = "dev") -> "ProjectConfig":
+        """Load configuration from YAML, resolving relative paths from cwd upward.
+
+        Args:
+            config_path: Path to configuration file
+            env: Environment name (dev, acc, prd)
+
+        Returns:
+            Instance of cls (respects subclasses)
+        """
+        if not Path(config_path).is_absolute():
+            current = Path.cwd()
+            for _ in range(3):
+                candidate = current / config_path
+                if candidate.exists():
+                    config_path = str(candidate)
+                    break
+                current = current.parent
+
+        return cls.from_yaml(config_path, env)
+
     @property
     def schema(self) -> str:
         """Alias for db_schema for backward compatibility."""
@@ -102,18 +124,7 @@ def load_config(config_path: str = "project_config.yml", env: str = "dev") -> Pr
     Returns:
         ProjectConfig instance
     """
-    # Handle relative paths from notebooks
-    if not Path(config_path).is_absolute():
-        # Try to find config in parent directories
-        current = Path.cwd()
-        for _ in range(3):  # Search up to 3 levels
-            candidate = current / config_path
-            if candidate.exists():
-                config_path = str(candidate)
-                break
-            current = current.parent
-
-    return ProjectConfig.from_yaml(config_path, env)
+    return ProjectConfig.load(config_path, env)
 
 
 def get_env(spark: SparkSession) -> str:
