@@ -1,0 +1,23 @@
+resources:
+  jobs:
+    drop_arxiv_papers_job:
+      name: drop-arxiv-papers
+      tags:
+        project_name: "llmops-databricks-course-datajanko"
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+
+      tasks:
+        - task_key: run_notebook
+          environment_key: default
+          notebook_task:
+            notebook_path: deployment_scripts/drop_arxiv_papers.py
+            base_parameters:
+              env: ${bundle.target}
+              git_sha: "${var.git_sha}"
+              run_id: "{{job.run_id}}"
