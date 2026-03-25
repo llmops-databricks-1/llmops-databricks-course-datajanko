@@ -38,7 +38,7 @@ logger.info(f"  Schema: {cfg.schema}")
 
 # COMMAND ----------
 
-processor = LearningBuddyDocumentProcessor(cfg)
+processor = LearningBuddyDocumentProcessor(config=cfg)
 processor.run()
 
 # COMMAND ----------
@@ -48,9 +48,7 @@ processor.run()
 
 # COMMAND ----------
 
-searcher = LearningBuddyVectorSearchManager(cfg)
-searcher.create_endpoint_if_not_exists()
-searcher.create_or_get_index()
+searcher = LearningBuddyVectorSearchManager(config=cfg)
 searcher.sync()
 
 logger.info("✓ Learning Buddy data processing pipeline complete!")
