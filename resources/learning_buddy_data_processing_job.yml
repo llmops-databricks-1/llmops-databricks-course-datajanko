@@ -1,0 +1,24 @@
+resources:
+  jobs:
+    learning-buddy-data-pipeline:
+      name: learning-buddy-data-pipeline
+      schedule:
+        quartz_cron_expression: "0 0 7 * * ?"
+        timezone_id: "Europe/Amsterdam"
+        pause_status: ${var.schedule_pause_status}
+      tags:
+        project_name: "llmops-databricks-course-datajanko"
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+
+      tasks:
+        - task_key: preprocessing
+          environment_key: default
+          notebook_task:
+            notebook_path: deployment_scripts/learning_buddy_process_data.py
+            base_parameters:
+              env: ${bundle.target}
