@@ -8,6 +8,14 @@ from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 
 
+class ChunkingConfig(BaseModel):
+    """Chunking configuration."""
+
+    chunk_size: int = Field(512, description="Chunk size in tokens")
+    chunk_overlap: int = Field(50, description="Overlap between chunks")
+    separator: str = Field("\n\n", description="Separator for chunking")
+
+
 class ProjectConfig(BaseModel):
     """Project configuration model."""
 
@@ -22,6 +30,10 @@ class ProjectConfig(BaseModel):
     system_prompt: str = Field(
         default=("You are a helpful AI assistant that helps users find and understand research papers."),
         description="System prompt for the agent",
+    )
+    chunking: ChunkingConfig = Field(
+        default_factory=ChunkingConfig,
+        description="Chunking configuration",
     )
 
     model_config = {"populate_by_name": True}
@@ -78,14 +90,6 @@ class VectorSearchConfig(BaseModel):
     embedding_dimension: int = Field(1024, description="Embedding dimension")
     similarity_metric: str = Field("cosine", description="Similarity metric")
     num_results: int = Field(5, description="Number of results to return")
-
-
-class ChunkingConfig(BaseModel):
-    """Chunking configuration."""
-
-    chunk_size: int = Field(512, description="Chunk size in tokens")
-    chunk_overlap: int = Field(50, description="Overlap between chunks")
-    separator: str = Field("\n\n", description="Separator for chunking")
 
 
 def load_config(config_path: str = "project_config.yml", env: str = "dev") -> ProjectConfig:
