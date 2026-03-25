@@ -350,7 +350,7 @@ class DataProcessor:
         """)
         logger.info(f"Change Data Feed enabled for {arxiv_chunks_table}")
 
-    def process_and_save(self) -> None:
+    def run(self) -> None:
         """
         Complete workflow: download papers, parse PDFs, and process chunks.
         """

@@ -40,7 +40,7 @@ logger.info(f"  Schema: {cfg.schema}")
 # COMMAND ----------
 
 processor = DataProcessor(spark=spark, config=cfg)
-processor.process_and_save()
+processor.run()
 
 # COMMAND ----------
 
@@ -50,6 +50,6 @@ processor.process_and_save()
 # COMMAND ----------
 
 vs_manager = VectorSearchManager(config=cfg)
-vs_manager.sync_index()
+vs_manager.sync()
 
 logger.info("✓ Data processing pipeline complete!")
