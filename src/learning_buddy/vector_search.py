@@ -37,27 +37,17 @@ class LearningBuddyVectorSearchManager:
     def create_endpoint_if_not_exists(self) -> None:
         """Create vector search endpoint if it doesn't exist."""
         endpoints_response = self.client.list_endpoints()
-        endpoints = (
-            endpoints_response.get("endpoints", [])
-            if isinstance(endpoints_response, dict)
-            else []
-        )
-        endpoint_exists = any(
-            (ep.get("name") if isinstance(ep, dict) else getattr(ep, "name", None))
-            == self.endpoint_name
-            for ep in endpoints
-        )
+        endpoints = endpoints_response.get("endpoints", []) if isinstance(endpoints_response, dict) else []
+        endpoint_exists = any((ep.get("name") if isinstance(ep, dict) else getattr(ep, "name", None)) == self.endpoint_name for ep in endpoints)
 
         if not endpoint_exists:
             logger.info(f"Creating vector search endpoint: {self.endpoint_name}")
-            self.client.create_endpoint_and_wait(
-                name=self.endpoint_name, endpoint_type="STANDARD"
-            )
+            self.client.create_endpoint_and_wait(name=self.endpoint_name, endpoint_type="STANDARD")
             logger.info(f"✓ Vector search endpoint created: {self.endpoint_name}")
         else:
             logger.info(f"✓ Vector search endpoint exists: {self.endpoint_name}")
 
-    def create_or_get_index(self) -> Any:
+    def create_or_get_index(self) -> Any:  # noqa ANN401
         """Create or retrieve the vector search index.
 
         Returns:

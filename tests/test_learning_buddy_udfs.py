@@ -5,8 +5,6 @@ These tests run without Spark — the UDFs are pure Python functions.
 
 import json
 
-import pytest
-
 from learning_buddy.data_processor import LearningBuddyDocumentProcessor
 
 

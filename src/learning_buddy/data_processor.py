@@ -61,9 +61,7 @@ class LearningBuddyDocumentProcessor:
             if candidate.exists():
                 return candidate
             current = current.parent
-        raise FileNotFoundError(
-            f"courses YAML not found: {courses_path} (searched from {Path.cwd()})"
-        )
+        raise FileNotFoundError(f"courses YAML not found: {courses_path} (searched from {Path.cwd()})")
 
     def _sync_courses(self) -> None:
         """Sync courses from YAML into learning_materials table.
@@ -83,16 +81,18 @@ class LearningBuddyDocumentProcessor:
             source_url = course.get("source_url", "")
 
             for item in course.get("contents", []) + course.get("exercises", []):
-                rows.append({
-                    "material_id": item["material_id"],
-                    "course": course_id,
-                    "language": language,
-                    "source_url": source_url,
-                    "document_type": item.get("document_type", ""),
-                    "title": item.get("title", ""),
-                    "url": item.get("url", ""),
-                    "description": item.get("description", ""),
-                })
+                rows.append(
+                    {
+                        "material_id": item["material_id"],
+                        "course": course_id,
+                        "language": language,
+                        "source_url": source_url,
+                        "document_type": item.get("document_type", ""),
+                        "title": item.get("title", ""),
+                        "url": item.get("url", ""),
+                        "description": item.get("description", ""),
+                    }
+                )
 
         logger.info(f"Loaded {len(rows)} materials from {courses_file}")
 
@@ -167,9 +167,7 @@ class LearningBuddyDocumentProcessor:
                 response.raise_for_status()
                 content_type = response.headers.get("Content-Type", "")
                 if "pdf" not in content_type.lower():
-                    logger.warning(
-                        f"Skipping {material_id}: expected PDF but got {content_type} from {url}"
-                    )
+                    logger.warning(f"Skipping {material_id}: expected PDF but got {content_type} from {url}")
                     continue
                 with open(dest_path, "wb") as f:
                     f.write(response.content)
@@ -220,24 +218,23 @@ class LearningBuddyDocumentProcessor:
         into the chunks table (with Change Data Feed enabled for delta sync).
         """
         chunk_schema = ArrayType(
-            StructType([
-                StructField("chunk_id", StringType(), True),
-                StructField("content", StringType(), True),
-            ])
+            StructType(
+                [
+                    StructField("chunk_id", StringType(), True),
+                    StructField("content", StringType(), True),
+                ]
+            )
         )
         extract_udf = udf(self._extract_chunks, chunk_schema)
         clean_udf = udf(self._clean_chunk, StringType())
 
         parsed_df = self.spark.table(self.parsed_table)
-        materials_df = self.spark.table(self.materials_table).select(
-            "material_id", "course", "document_type", "language", "title"
-        )
+        materials_df = self.spark.table(self.materials_table).select("material_id", "course", "document_type", "language", "title")
 
         from pyspark.sql.functions import concat_ws, explode
 
         chunks_df = (
-            parsed_df
-            .withColumn("chunks", extract_udf(col("parsed_content")))
+            parsed_df.withColumn("chunks", extract_udf(col("parsed_content")))
             .withColumn("chunk", explode(col("chunks")))
             .select(
                 concat_ws("_", col("material_id"), col("chunk.chunk_id")).alias("chunk_id"),

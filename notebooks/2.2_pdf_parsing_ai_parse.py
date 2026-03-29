@@ -9,13 +9,13 @@
 # MAGIC - Storing parsed content in Delta tables
 
 # COMMAND ----------
-#%pip install ../arxiv_curator-0.1.0-py3-none-any.whl
+# %pip install ../arxiv_curator-0.1.0-py3-none-any.whl
 # COMMAND ----------
 
-from loguru import logger
 from databricks.connect import DatabricksSession
+from loguru import logger
 
-from arxiv_curator.config import load_config, get_env
+from arxiv_curator.config import get_env, load_config
 from arxiv_curator.data_processor import DataProcessor
 
 # COMMAND ----------
@@ -38,7 +38,7 @@ logger.info(f"Catalog: {cfg.catalog}, Schema: {cfg.schema}, Volume: {cfg.volume}
 # MAGIC
 # MAGIC | Tool | Pros | Cons | Best For |
 # MAGIC |------|------|------|----------|
-# MAGIC | **AI Parse Documents** | - AI-powered<br>- Handles complex layouts<br>- Integrated with Databricks<br>- Preserves structure | - Databricks-specific<br>- Cost per page | Complex documents, tables, multi-column |
+# MAGIC | **AI Parse Documents** | - AI-powered<br>- Handles complex layouts<br>- Integrated with Databricks<br>- Preserves structure | - Databricks-specific<br>- Cost per page | Complex documents, tables, multi-column | #noqa E501
 # MAGIC | **PyPDF2** | - Simple<br>- Free<br>- Pure Python | - Poor with complex layouts<br>- No table extraction | Simple text extraction |
 # MAGIC | **pdfplumber** | - Good table extraction<br>- Layout analysis | - Slower<br>- Manual tuning needed | Tables and structured data |
 # MAGIC | **Apache Tika** | - Multi-format support<br>- Metadata extraction | - Java dependency<br>- Heavy | Multi-format processing |

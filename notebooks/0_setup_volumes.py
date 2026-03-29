@@ -18,11 +18,11 @@ from commons.config import load_config
 # COMMAND ----------
 
 # Get parameters from Databricks widgets
-dbutils.widgets.text("config_path", "arxiv_config.yml", "Config File Path")
-dbutils.widgets.text("env", "dev", "Environment")
+dbutils.widgets.text("config_path", "arxiv_config.yml", "Config File Path")  # noqa F821
+dbutils.widgets.text("env", "dev", "Environment")  # noqa F821
 
-config_path = dbutils.widgets.get("config_path")
-env = dbutils.widgets.get("env")
+config_path = dbutils.widgets.get("config_path")  # noqa F821
+env = dbutils.widgets.get("env")  # noqa F821
 
 spark = SparkSession.builder.getOrCreate()
 
@@ -59,9 +59,7 @@ except Exception as e:
 
 # Create volume if it doesn't exist
 try:
-    spark.sql(
-        f"CREATE VOLUME IF NOT EXISTS {cfg.catalog}.{cfg.db_schema}.{cfg.volume}"
-    )
+    spark.sql(f"CREATE VOLUME IF NOT EXISTS {cfg.catalog}.{cfg.db_schema}.{cfg.volume}")
     logger.info(f"✓ Volume '{cfg.full_volume_path}' ready")
 except Exception as e:
     logger.warning(f"Could not create volume: {e}")

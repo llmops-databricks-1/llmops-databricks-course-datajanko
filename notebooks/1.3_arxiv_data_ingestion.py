@@ -29,9 +29,7 @@ logger.info(f"Schema {CATALOG}.{SCHEMA} ready")
 # Fetch arXiv Paper Metadata from arXiv API: https://arxiv.org/help/api/index
 
 
-def fetch_arxiv_papers(
-    query: str = "cat:cs.AI OR cat:cs.LG", max_results: int = 100
-) -> list[dict[str, str | int | list[str] | None]]:
+def fetch_arxiv_papers(query: str = "cat:cs.AI OR cat:cs.LG", max_results: int = 100) -> list[dict[str, str | int | list[str] | None]]:
     """
     Fetch arXiv papers using the arXiv API.
 
