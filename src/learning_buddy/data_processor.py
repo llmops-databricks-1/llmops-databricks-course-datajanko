@@ -1,6 +1,8 @@
 """Document processor for the Learning Buddy use case."""
 
+import os
 import re
+import time
 from pathlib import Path
 
 import requests
@@ -31,6 +33,9 @@ class LearningBuddyDocumentProcessor:
         self.catalog = config.catalog
         self.schema = config.schema
         self.spark = SparkSession.getActiveSession()
+
+        self.run_ts = time.strftime("%Y%m%d%H%M", time.gmtime())
+        self.pdf_dir = f"/Volumes/{self.catalog}/{self.schema}/{self.cfg.volume}/{self.run_ts}"
 
         self.materials_table = f"{self.catalog}.{self.schema}.learning_materials"
         self.parsed_table = f"{self.catalog}.{self.schema}.learning_materials_parsed"
@@ -132,11 +137,11 @@ class LearningBuddyDocumentProcessor:
         logger.info(f"Synced materials into {self.materials_table}")
 
     def _download_materials(self) -> None:
-        """Download PDFs for unprocessed materials to the Databricks volume.
+        """Download PDFs for unprocessed materials into a timestamped subfolder.
 
-        Queries learning_materials WHERE processed IS NULL OR processed = false,
-        downloads each PDF to /Volumes/{catalog}/{schema}/{volume}/{material_id}.pdf,
-        and updates volume_path on success.
+        Creates self.pdf_dir, downloads each unprocessed PDF there as
+        {material_id}.pdf, and updates volume_path on success.
+        Skips non-PDF responses and logs a warning on failure.
         """
         unprocessed = self.spark.sql(f"""
             SELECT material_id, url
@@ -145,18 +150,27 @@ class LearningBuddyDocumentProcessor:
               AND url IS NOT NULL AND url != ''
         """).collect()
 
-        logger.info(f"Downloading {len(unprocessed)} PDFs")
+        if not unprocessed:
+            logger.info("No unprocessed materials to download")
+            return
 
-        volume_base = f"/Volumes/{self.catalog}/{self.schema}/{self.cfg.volume}"
+        os.makedirs(self.pdf_dir, exist_ok=True)
+        logger.info(f"Downloading {len(unprocessed)} PDFs to {self.pdf_dir}")
 
         for row in unprocessed:
             material_id = row["material_id"]
             url = row["url"]
-            dest_path = f"{volume_base}/{material_id}.pdf"
+            dest_path = f"{self.pdf_dir}/{material_id}.pdf"
 
             try:
                 response = requests.get(url, timeout=60)
                 response.raise_for_status()
+                content_type = response.headers.get("Content-Type", "")
+                if "pdf" not in content_type.lower():
+                    logger.warning(
+                        f"Skipping {material_id}: expected PDF but got {content_type} from {url}"
+                    )
+                    continue
                 with open(dest_path, "wb") as f:
                     f.write(response.content)
                 self.spark.sql(f"""
@@ -169,10 +183,11 @@ class LearningBuddyDocumentProcessor:
                 logger.warning(f"Failed to download {material_id} from {url}: {e}")
 
     def _parse_documents(self) -> None:
-        """Parse PDFs from volume using ai_parse_document.
+        """Parse PDFs from the timestamped run directory using ai_parse_document.
 
-        Reads unprocessed rows from learning_materials, calls ai_parse_document
-        on each volume_path, and writes results to learning_materials_parsed.
+        Reads all files from self.pdf_dir (the folder populated by
+        _download_materials), derives material_id from the filename,
+        and inserts parsed results into learning_materials_parsed.
         """
         self.spark.sql(f"""
             CREATE TABLE IF NOT EXISTS {self.parsed_table} (
@@ -186,22 +201,13 @@ class LearningBuddyDocumentProcessor:
         self.spark.sql(f"""
             INSERT INTO {self.parsed_table}
             SELECT
-                material_id,
-                volume_path,
+                regexp_extract(path, '([^/]+)\\.pdf$', 1) AS material_id,
+                path AS volume_path,
                 ai_parse_document(content) AS parsed_content,
                 current_timestamp() AS parse_ts
-            FROM (
-                SELECT m.material_id, m.volume_path,
-                       f.content
-                FROM {self.materials_table} m
-                JOIN (
-                    SELECT path, content
-                    FROM READ_FILES(
-                        '/Volumes/{self.catalog}/{self.schema}/{self.cfg.volume}',
-                        format => 'binaryFile'
-                    )
-                ) f ON f.path = m.volume_path
-                WHERE m.processed IS NULL OR m.processed = false
+            FROM READ_FILES(
+                '{self.pdf_dir}',
+                format => 'binaryFile'
             )
         """)
 
@@ -275,11 +281,16 @@ class LearningBuddyDocumentProcessor:
         logger.info(f"Chunks merged into {self.chunks_table}")
 
     def _mark_processed(self) -> None:
-        """Mark ingested materials as processed in learning_materials."""
+        """Mark ingested materials as processed in learning_materials.
+
+        Only marks rows where volume_path is set, ensuring rows that failed
+        to download are retried on the next run.
+        """
         self.spark.sql(f"""
             UPDATE {self.materials_table}
             SET processed = true
-            WHERE processed IS NULL OR processed = false
+            WHERE volume_path IS NOT NULL
+              AND (processed IS NULL OR processed = false)
         """)
         logger.info("Marked learning_materials rows as processed=true")
 

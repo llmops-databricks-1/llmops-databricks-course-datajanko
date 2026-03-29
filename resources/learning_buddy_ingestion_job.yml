@@ -3,7 +3,7 @@ resources:
     learning_buddy_ingestion_job:
       name: learning_buddy_ingestion
       tags:
-        project_name: "learning-buddy"
+        project_name: "llmops-databricks-course-datajanko"
 
       environments:
         - environment_key: default

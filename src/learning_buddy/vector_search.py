@@ -85,7 +85,7 @@ class LearningBuddyVectorSearchManager:
             logger.info(f"✓ Vector search index created: {self.index_name}")
             return index
         except Exception as e:
-            if "RESOURCE_ALREADY_EXISTS" not in str(e):
+            if "already exists" not in str(e):
                 raise
             logger.info(f"✓ Vector search index exists: {self.index_name}")
             return self.client.get_index(index_name=self.index_name)

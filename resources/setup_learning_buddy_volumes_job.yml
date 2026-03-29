@@ -3,7 +3,7 @@ resources:
     setup_learning_buddy_volumes_job:
       name: setup_learning_buddy_volumes
       tags:
-        project_name: "llmops-databricks-course"
+        project_name: "llmops-databricks-course-datajanko"
 
       environments:
         - environment_key: default

@@ -54,66 +54,36 @@ courses:
       - material_id: mit_18_100a_lecture
         document_type: lecture
         title: "Real Analysis - Lecture Notes"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/lecture-notes/"
+        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_lec_full2.pdf"
         description: "Lecture notes for MIT 18.100A Real Analysis"
     exercises:
       - material_id: mit_18_100a_hw1
         document_type: homework
         homework_set_number: 1
         title: "Real Analysis - Problem Set 1"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
+        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw1.pdf"
       - material_id: mit_18_100a_hw2
         document_type: homework
         homework_set_number: 2
         title: "Real Analysis - Problem Set 2"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
+        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw2.pdf"
       - material_id: mit_18_100a_hw3
         document_type: homework
         homework_set_number: 3
         title: "Real Analysis - Problem Set 3"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
+        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw3.pdf"
       - material_id: mit_18_100a_hw4
         document_type: homework
         homework_set_number: 4
         title: "Real Analysis - Problem Set 4"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
+        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw4.pdf"
       - material_id: mit_18_100a_hw5
         document_type: homework
         homework_set_number: 5
         title: "Real Analysis - Problem Set 5"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
+        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw5.pdf"
       - material_id: mit_18_100a_hw6
         document_type: homework
         homework_set_number: 6
         title: "Real Analysis - Problem Set 6"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
-      - material_id: mit_18_100a_hw7
-        document_type: homework
-        homework_set_number: 7
-        title: "Real Analysis - Problem Set 7"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
-      - material_id: mit_18_100a_hw8
-        document_type: homework
-        homework_set_number: 8
-        title: "Real Analysis - Problem Set 8"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
-      - material_id: mit_18_100a_hw9
-        document_type: homework
-        homework_set_number: 9
-        title: "Real Analysis - Problem Set 9"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
-      - material_id: mit_18_100a_hw10
-        document_type: homework
-        homework_set_number: 10
-        title: "Real Analysis - Problem Set 10"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
-      - material_id: mit_18_100a_hw11
-        document_type: homework
-        homework_set_number: 11
-        title: "Real Analysis - Problem Set 11"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
-      - material_id: mit_18_100a_hw12
-        document_type: homework
-        homework_set_number: 12
-        title: "Real Analysis - Problem Set 12"
-        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/pages/assignments/"
+        url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/mit18_100af20_hw6.pdf"
