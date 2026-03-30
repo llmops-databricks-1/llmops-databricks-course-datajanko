@@ -81,5 +81,18 @@ ignore = [
     "ANN101"
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Databricks notebooks: cell-scoped imports, dbutils global, notebook patterns
+"notebooks/**" = [
+    "E402",   # module-level import not at top (each cell is independent)
+    "F821",   # undefined name (dbutils is a Databricks-injected global)
+    "ANN",    # type annotations not required in notebooks
+    "B007",   # loop control variable not used (e.g., `for iteration in range(...)`)
+    "B905",   # zip() without strict (notebook utility code)
+    "SIM105", # use contextlib.suppress (try/except/pass is readable in notebooks)
+    "SIM118", # use `key in dict` (minor style, irrelevant in notebooks)
+    "F811",   # redefined-while-unused (re-imports across cells)
+]
+
 [tool.ruff.format]
 indent-style = "space"
