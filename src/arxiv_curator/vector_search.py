@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from databricks.sdk import WorkspaceClient
 from databricks.vector_search.client import VectorSearchClient
 from loguru import logger
 
@@ -33,7 +34,11 @@ class VectorSearchManager:
         self.schema = config.schema
         self.usage_policy_id = usage_policy_id
 
-        self.client = VectorSearchClient()
+        w = WorkspaceClient()
+        self.client = VectorSearchClient(
+            workspace_url=w.config.host,
+            personal_access_token=w.tokens.create(lifetime_seconds=1200).token_value,
+        )
         self.index_name = f"{self.catalog}.{self.schema}.arxiv_index"
 
     def create_endpoint_if_not_exists(self) -> None:
