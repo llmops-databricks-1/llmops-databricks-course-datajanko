@@ -1,10 +1,13 @@
 resources:
   jobs:
-    learning_buddy_ingestion_job:
-      name: learning_buddy_ingestion
+    data-pipeline:
+      name: arxiv-data-pipeline
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: "Europe/Amsterdam"
+        pause_status: ${var.schedule_pause_status}
       tags:
         project_name: "llmops-databricks-course-datajanko"
-
       environments:
         - environment_key: default
           spec:
@@ -13,11 +16,9 @@ resources:
               - ../dist/*.whl
 
       tasks:
-        - task_key: learning_buddy_ingestion
+        - task_key: preprocessing
           environment_key: default
           notebook_task:
-            notebook_path: ../notebooks/1.5_learning_buddy_ingestion.py
+            notebook_path: deployment_scripts/arxiv_curator_process_data.py
             base_parameters:
               env: ${bundle.target}
-              git_sha: "${var.git_sha}"
-              run_id: "{{job.run_id}}"

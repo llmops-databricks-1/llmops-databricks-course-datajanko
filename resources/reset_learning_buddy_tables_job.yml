@@ -1,23 +1,19 @@
 resources:
   jobs:
-    learning_buddy_ingestion_job:
-      name: learning_buddy_ingestion
+    reset_learning_buddy_tables_job:
+      name: reset_learning_buddy_tables
       tags:
         project_name: "llmops-databricks-course-datajanko"
-
       environments:
         - environment_key: default
           spec:
             environment_version: "4"
             dependencies:
               - ../dist/*.whl
-
       tasks:
-        - task_key: learning_buddy_ingestion
+        - task_key: reset_tables
           environment_key: default
           notebook_task:
-            notebook_path: ../notebooks/1.5_learning_buddy_ingestion.py
+            notebook_path: deployment_scripts/reset_learning_buddy_tables.py
             base_parameters:
               env: ${bundle.target}
-              git_sha: "${var.git_sha}"
-              run_id: "{{job.run_id}}"

@@ -15,7 +15,7 @@ spark = SparkSession.builder.getOrCreate()
 
 # Load config
 env = get_env(spark)
-cfg = load_config("../project_config.yml", env)
+cfg = load_config("../arxiv_config.yml", env)
 
 CATALOG = cfg.catalog
 SCHEMA = cfg.schema
@@ -29,9 +29,7 @@ logger.info(f"Schema {CATALOG}.{SCHEMA} ready")
 # Fetch arXiv Paper Metadata from arXiv API: https://arxiv.org/help/api/index
 
 
-def fetch_arxiv_papers(
-    query: str = "cat:cs.AI OR cat:cs.LG", max_results: int = 100
-) -> list[dict[str, str | int | list[str] | None]]:
+def fetch_arxiv_papers(query: str = "cat:cs.AI OR cat:cs.LG", max_results: int = 100) -> list[dict[str, str | int | list[str] | None]]:
     """
     Fetch arXiv papers using the arXiv API.
 

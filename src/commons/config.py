@@ -8,6 +8,14 @@ from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 
 
+class ChunkingConfig(BaseModel):
+    """Chunking configuration."""
+
+    chunk_size: int = Field(512, description="Chunk size in tokens")
+    chunk_overlap: int = Field(50, description="Overlap between chunks")
+    separator: str = Field("\n\n", description="Separator for chunking")
+
+
 class ProjectConfig(BaseModel):
     """Project configuration model."""
 
@@ -22,6 +30,10 @@ class ProjectConfig(BaseModel):
     system_prompt: str = Field(
         default=("You are a helpful AI assistant that helps users find and understand research papers."),
         description="System prompt for the agent",
+    )
+    chunking: ChunkingConfig = Field(
+        default_factory=ChunkingConfig,
+        description="Chunking configuration",
     )
 
     model_config = {"populate_by_name": True}
@@ -47,6 +59,28 @@ class ProjectConfig(BaseModel):
             raise ValueError(f"Environment '{env}' not found in config file")
 
         return cls(**config_data[env])
+
+    @classmethod
+    def load(cls, config_path: str = "project_config.yml", env: str = "dev") -> "ProjectConfig":
+        """Load configuration from YAML, resolving relative paths from cwd upward.
+
+        Args:
+            config_path: Path to configuration file
+            env: Environment name (dev, acc, prd)
+
+        Returns:
+            Instance of cls (respects subclasses)
+        """
+        if not Path(config_path).is_absolute():
+            current = Path.cwd()
+            for _ in range(3):
+                candidate = current / config_path
+                if candidate.exists():
+                    config_path = str(candidate)
+                    break
+                current = current.parent
+
+        return cls.from_yaml(config_path, env)
 
     @property
     def schema(self) -> str:
@@ -80,14 +114,6 @@ class VectorSearchConfig(BaseModel):
     num_results: int = Field(5, description="Number of results to return")
 
 
-class ChunkingConfig(BaseModel):
-    """Chunking configuration."""
-
-    chunk_size: int = Field(512, description="Chunk size in tokens")
-    chunk_overlap: int = Field(50, description="Overlap between chunks")
-    separator: str = Field("\n\n", description="Separator for chunking")
-
-
 def load_config(config_path: str = "project_config.yml", env: str = "dev") -> ProjectConfig:
     """Load project configuration.
 
@@ -98,18 +124,7 @@ def load_config(config_path: str = "project_config.yml", env: str = "dev") -> Pr
     Returns:
         ProjectConfig instance
     """
-    # Handle relative paths from notebooks
-    if not Path(config_path).is_absolute():
-        # Try to find config in parent directories
-        current = Path.cwd()
-        for _ in range(3):  # Search up to 3 levels
-            candidate = current / config_path
-            if candidate.exists():
-                config_path = str(candidate)
-                break
-            current = current.parent
-
-    return ProjectConfig.from_yaml(config_path, env)
+    return ProjectConfig.load(config_path, env)
 
 
 def get_env(spark: SparkSession) -> str:

@@ -1,9 +1,9 @@
 resources:
   jobs:
-    learning_buddy_ingestion_job:
-      name: learning_buddy_ingestion
+    pdf_parsing_ai_parse_job:
+      name: pdf_parsing_ai_parse
       tags:
-        project_name: "llmops-databricks-course-datajanko"
+        project_name: "llmops-databricks-course"
 
       environments:
         - environment_key: default
@@ -13,10 +13,10 @@ resources:
               - ../dist/*.whl
 
       tasks:
-        - task_key: learning_buddy_ingestion
+        - task_key: run_notebook
           environment_key: default
           notebook_task:
-            notebook_path: ../notebooks/1.5_learning_buddy_ingestion.py
+            notebook_path: ../notebooks/2.2_pdf_parsing_ai_parse.py
             base_parameters:
               env: ${bundle.target}
               git_sha: "${var.git_sha}"

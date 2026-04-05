@@ -8,6 +8,9 @@ variables:
   git_sha:
     description: "Git SHA of the deployed commit"
     default: "local"
+  schedule_pause_status:
+    description: "Whether the scheduled job is paused (PAUSED or UNPAUSED)"
+    default: "PAUSED"
 
 artifacts:
   default:
