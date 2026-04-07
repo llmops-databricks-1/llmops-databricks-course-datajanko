@@ -1,24 +1,23 @@
 # Databricks notebook source
-"""
-3.7 Learning Buddy Agent
-
-Combines patterns from 3.1 (custom tools) and 3.2 (MCP/tool registry) to build
-an agentic learning buddy for math courses.
-
-Supported courses:
-- mit_18_100a  — Real Analysis (English, MIT 18.100A)
-- bielefeld_a1 — Analysis I (German, Universität Bielefeld)
-
-The agent can:
-- Fetch all problems from a specific homework set (week)
-- Fetch a single problem by its number within a homework set
-- Search lecture notes for concepts, theorems, and definitions
-- Search homework exercises by topic or keyword
-- Cross-search both courses and synthesize results
-
-Queries NOT supported (require full-corpus aggregation, not similarity search):
-- "What are the most referenced topics in Analysis I?" → use Genie Space instead
-"""
+# MAGIC %md
+# MAGIC 3.7 Learning Buddy Agent
+# MAGIC
+# MAGIC Combines patterns from 3.1 (custom tools) and 3.2 (MCP/tool registry) to build
+# MAGIC an agentic learning buddy for math courses.
+# MAGIC
+# MAGIC Supported courses:
+# MAGIC - mit_18_100a  — Real Analysis (English, MIT 18.100A)
+# MAGIC - bielefeld_a1 — Analysis I (German, Universität Bielefeld)
+# MAGIC
+# MAGIC The agent can:
+# MAGIC - Fetch all problems from a specific homework set (week)
+# MAGIC - Fetch a single problem by its number within a homework set
+# MAGIC - Search lecture notes for concepts, theorems, and definitions
+# MAGIC - Search homework exercises by topic or keyword
+# MAGIC - Cross-search both courses and synthesize results
+# MAGIC
+# MAGIC Queries NOT supported (require full-corpus aggregation, not similarity search):
+# MAGIC - "What are the most referenced topics in Analysis I?" → use Genie Space instead
 
 # COMMAND ----------
 
