@@ -96,6 +96,3 @@ ignore = [
 
 [tool.ruff.format]
 indent-style = "space"
-
-[tool.uv]
-exclude-newer = "7 days"
