@@ -23,15 +23,20 @@
 
 # Cell 1: Setup & Config
 
+import asyncio
 import json
 
+import nest_asyncio
 from databricks.sdk import WorkspaceClient
 from loguru import logger
 from openai import OpenAI
 from pyspark.sql import SparkSession
 
-from arxiv_curator.mcp import ToolInfo
 from commons.config import get_env, load_config
+from commons.mcp import ToolInfo, create_mcp_tools
+
+# Enable nested event loops (required for Databricks notebooks)
+nest_asyncio.apply()
 
 # COMMAND ----------
 
@@ -289,6 +294,20 @@ logger.info("✓ Tools defined: get_problems_by_week, search_lectures, search_ho
 
 # COMMAND ----------
 
+# Cell 5b: Load MCP tools (Vector Search + Genie) — pattern from 3.2
+
+host = w.config.host
+mcp_urls = [f"{host}/api/2.0/mcp/vector-search/{cfg.catalog}/{cfg.schema}"]
+
+if hasattr(cfg, "genie_space_id") and cfg.genie_space_id:
+    mcp_urls.append(f"{host}/api/2.0/mcp/genie/{cfg.genie_space_id}")
+
+logger.info(f"Loading tools from {len(mcp_urls)} MCP servers...")
+mcp_tools = asyncio.run(create_mcp_tools(w, mcp_urls))
+logger.info(f"✓ Loaded {len(mcp_tools)} MCP tools: {[t.name for t in mcp_tools]}")
+
+# COMMAND ----------
+
 # Cell 6: ToolRegistry + SimpleAgent (pattern from 3.1)
 
 from typing import Any
@@ -429,6 +448,12 @@ SYSTEM_PROMPT = """You are a Learning Buddy — an AI assistant that helps stude
 # Cell 8: Agent instantiation + test queries
 
 registry = ToolRegistry()
+
+# Register MCP tools first (Vector Search + Genie)
+for mcp_tool in mcp_tools:
+    registry.register(mcp_tool)
+
+# Register custom tools (learning-buddy-specific logic)
 registry.register(get_problems_by_week_tool)
 registry.register(search_lectures_tool)
 registry.register(search_homework_tool)

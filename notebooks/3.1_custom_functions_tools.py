@@ -53,7 +53,7 @@ from loguru import logger
 from pyspark.sql import SparkSession
 
 from arxiv_curator.config import get_env, load_config
-from arxiv_curator.mcp import ToolInfo
+from commons.mcp import ToolInfo
 
 # COMMAND ----------
 spark = SparkSession.builder.getOrCreate()
