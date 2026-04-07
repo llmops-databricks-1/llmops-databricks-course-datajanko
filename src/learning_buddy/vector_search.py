@@ -107,7 +107,7 @@ class LearningBuddyVectorSearchManager:
         index = self.client.get_index(index_name=self.index_name)
         results = index.similarity_search(
             query_text=query_text,
-            columns=["chunk_id", "material_id", "text", "course", "title"],
+            columns=["chunk_id", "material_id", "text", "course", "title", "language", "document_type"],
             num_results=num_results,
             filters=filters,
         )
