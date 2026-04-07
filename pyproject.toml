@@ -96,3 +96,11 @@ ignore = [
 
 [tool.ruff.format]
 indent-style = "space"
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[tool.uv]
+exclude-newer = "7 days"
