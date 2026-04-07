@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["databricks-connect>=18.1.1, <19",
+dev = ["databricks-connect>=17, <18",
        "ipykernel>=7.2.0, <8",
        "pip>=26.0.1, <27",
        "prek>=0.3.6, <1",
@@ -96,3 +96,6 @@ ignore = [
 
 [tool.ruff.format]
 indent-style = "space"
+
+[tool.uv]
+exclude-newer = "7 days"
