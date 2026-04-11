@@ -21,8 +21,8 @@ from loguru import logger
 from mlflow.genai.judges import make_judge
 from pyspark.sql import SparkSession
 
-from arxiv_curator.config import get_env, load_config
 from arxiv_curator.evaluation import polite_tone_guideline, word_count_check
+from commons.config import get_env, load_config
 
 # COMMAND ----------
 

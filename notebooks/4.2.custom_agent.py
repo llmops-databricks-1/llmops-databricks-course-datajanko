@@ -28,7 +28,7 @@ from mlflow.types.responses import (
 from pyspark.sql import SparkSession
 
 from arxiv_curator.agent import ArxivAgent
-from arxiv_curator.config import get_env, load_config
+from commons.config import get_env, load_config
 
 # COMMAND ----------
 

@@ -31,9 +31,9 @@ from mlflow.types.responses import (
     to_chat_completions_input,
 )
 
-from arxiv_curator.config import ProjectConfig
 from arxiv_curator.mcp import create_mcp_tools
 from arxiv_curator.memory import LakebaseMemory
+from commons.config import ProjectConfig
 
 
 class ArxivAgent(ResponsesAgent):

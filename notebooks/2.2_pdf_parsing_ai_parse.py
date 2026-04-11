@@ -15,8 +15,8 @@
 from databricks.connect import DatabricksSession
 from loguru import logger
 
-from arxiv_curator.config import get_env, load_config
 from arxiv_curator.data_processor import DataProcessor
+from commons.config import get_env, load_config
 
 # COMMAND ----------
 

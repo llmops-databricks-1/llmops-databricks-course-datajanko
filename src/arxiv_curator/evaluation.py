@@ -2,7 +2,7 @@ import mlflow
 from mlflow.genai.scorers import Guidelines
 
 from arxiv_curator.agent import ArxivAgent
-from arxiv_curator.config import ProjectConfig
+from commons.config import ProjectConfig
 
 polite_tone_guideline = Guidelines(
     name="polite_tone",
