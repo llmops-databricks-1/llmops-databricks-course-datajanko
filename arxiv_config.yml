@@ -12,6 +12,7 @@ dev:
   genie_space_id: 01f12d424a8b1053914d68efa80eace5
   usage_policy_id: 686c435d-90af-4c40-9ca4-442d4a3d8899
   lakebase_project_id: arxiv-agent-lakebase
+  experiment_name: /Shared/llmops-jankoch8-arxiv
 
 # Acceptance/Staging environment
 acc:
@@ -25,6 +26,7 @@ acc:
   genie_space_id: 01f12d424a8b1053914d68efa80eace5
   usage_policy_id: 686c435d-90af-4c40-9ca4-442d4a3d8899
   lakebase_project_id: arxiv-agent-lakebase
+  experiment_name: /Shared/llmops-jankoch8-arxiv
 
 # Production environment
 prd:
@@ -38,6 +40,7 @@ prd:
   genie_space_id: 01f12d424a8b1053914d68efa80eace5
   usage_policy_id: 686c435d-90af-4c40-9ca4-442d4a3d8899
   lakebase_project_id: arxiv-agent-lakebase
+  experiment_name: /Shared/llmops-jankoch8-arxiv
 
 # Model configuration
 model_config:

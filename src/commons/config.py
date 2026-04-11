@@ -29,6 +29,7 @@ class ProjectConfig(BaseModel):
     genie_space_id: str | None = Field(None, description="Genie space ID for MCP integration")
     usage_policy_id: str = Field(..., description="Usage policy id")
     lakebase_project_id: str = Field(..., description="Lakebase project id")
+    experiment_name: str = Field(..., description="MLflow experiment path")
     system_prompt: str = Field(
         default=("You are a helpful AI assistant that helps users find and understand research papers."),
         description="System prompt for the agent",

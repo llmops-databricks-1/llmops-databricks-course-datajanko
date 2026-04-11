@@ -37,7 +37,7 @@ spark = SparkSession.builder.getOrCreate()
 
 # Load configuration
 env = get_env(spark)
-cfg = load_config("../project_config.yml", env)
+cfg = load_config("../arxiv_config.yml", env)
 
 # COMMAND ----------
 

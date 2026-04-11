@@ -37,7 +37,7 @@ spark = SparkSession.builder.getOrCreate()
 
 # Load configuration
 env = get_env(spark)
-cfg = load_config("../project_config.yml", env)
+cfg = load_config("../arxiv_config.yml", env)
 
 # COMMAND ----------
 
@@ -74,7 +74,7 @@ cfg = load_config("../project_config.yml", env)
 # COMMAND ----------
 
 # Set experiment
-mlflow.set_experiment("/Shared/llmops-course-demo")
+mlflow.set_experiment(cfg.experiment_name)
 
 
 # Simple function with tracing

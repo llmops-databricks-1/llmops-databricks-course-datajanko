@@ -283,7 +283,7 @@ def log_register_agent(
 
     test_request = {"input": [{"role": "user", "content": "What are recent papers about LLMs and reasoning?"}]}
 
-    mlflow.set_experiment(cfg.experiment_path)
+    mlflow.set_experiment(cfg.experiment_name)
     ts = datetime.now().strftime("%Y-%m-%d")
 
     with mlflow.start_run(

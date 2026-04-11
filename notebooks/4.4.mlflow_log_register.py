@@ -10,18 +10,21 @@ from mlflow.models.resources import (
     DatabricksTable,
     DatabricksVectorSearchIndex,
 )
+from pyspark.sql import SparkSession
 
 from arxiv_curator.agent import ArxivAgent
-from arxiv_curator.config import ProjectConfig
 from arxiv_curator.evaluation import (
     hook_in_post_guideline,
     polite_tone_guideline,
     word_count_check,
 )
+from commons.config import get_env, load_config
 
 # COMMAND ----------
 # Initialize the agent
-cfg = ProjectConfig.from_yaml("../project_config.yml")
+spark = SparkSession.builder.getOrCreate()
+env = get_env(spark)
+cfg = load_config("../arxiv_config.yml", env)
 mlflow.set_experiment(cfg.experiment_name)
 
 agent = ArxivAgent(
