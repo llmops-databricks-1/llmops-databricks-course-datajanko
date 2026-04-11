@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from databricks.sdk import WorkspaceClient
 from databricks.vector_search.client import VectorSearchClient
 from loguru import logger
 
@@ -30,7 +31,11 @@ class LearningBuddyVectorSearchManager:
         self.endpoint_name = config.vector_search_endpoint
         self.embedding_model = config.embedding_endpoint
 
-        self.client = VectorSearchClient()
+        w = WorkspaceClient()
+        self.client = VectorSearchClient(
+            workspace_url=w.config.host,
+            personal_access_token=w.tokens.create(lifetime_seconds=1200).token_value,
+        )
         self.index_name = f"{self.catalog}.{self.schema}.learning_buddy_index"
         self.source_table = f"{self.catalog}.{self.schema}.learning_materials_chunks"
 
@@ -42,7 +47,7 @@ class LearningBuddyVectorSearchManager:
 
         if not endpoint_exists:
             logger.info(f"Creating vector search endpoint: {self.endpoint_name}")
-            self.client.create_endpoint_and_wait(name=self.endpoint_name, endpoint_type="STANDARD")
+            self.client.create_endpoint_and_wait(name=self.endpoint_name, endpoint_type="STANDARD", usage_policy_id=self.cfg.usage_policy_id)
             logger.info(f"✓ Vector search endpoint created: {self.endpoint_name}")
         else:
             logger.info(f"✓ Vector search endpoint exists: {self.endpoint_name}")
@@ -71,11 +76,12 @@ class LearningBuddyVectorSearchManager:
                 primary_key="chunk_id",
                 embedding_source_column="text",
                 embedding_model_endpoint_name=self.embedding_model,
+                usage_policy_id=self.cfg.usage_policy_id,
             )
             logger.info(f"✓ Vector search index created: {self.index_name}")
             return index
         except Exception as e:
-            if "already exists" not in str(e):
+            if "RESOURCE_ALREADY_EXISTS" not in str(e):
                 raise
             logger.info(f"✓ Vector search index exists: {self.index_name}")
             return self.client.get_index(index_name=self.index_name)
@@ -87,12 +93,13 @@ class LearningBuddyVectorSearchManager:
         index.sync()
         logger.info("✓ Index sync triggered")
 
-    def search(self, query_text: str, num_results: int = 5) -> list:
+    def search(self, query_text: str, num_results: int = 5, filters: dict | None = None) -> list:
         """Search the learning buddy index.
 
         Args:
             query_text: Natural language query
             num_results: Number of results to return
+            filters: Optional filters to apply
 
         Returns:
             List of matching result rows
@@ -100,7 +107,8 @@ class LearningBuddyVectorSearchManager:
         index = self.client.get_index(index_name=self.index_name)
         results = index.similarity_search(
             query_text=query_text,
-            columns=["chunk_id", "material_id", "text", "course", "title"],
+            columns=["chunk_id", "material_id", "text", "course", "title", "language", "document_type"],
             num_results=num_results,
+            filters=filters,
         )
         return results
