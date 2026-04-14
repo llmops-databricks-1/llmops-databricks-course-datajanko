@@ -40,4 +40,4 @@ jobs:
 
       - name: run pytest
         run: |
-          uv run pytest -vv
+          uv run pytest
