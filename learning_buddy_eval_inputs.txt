@@ -1,6 +1,7 @@
 What are the exercises of week 3 for Real Analysis?
 Show me problem 2 of week 3 in the Real Analysis course.
 Which topics from the lecture can help solve problem 2 of week 3 in Real Analysis?
+Which topics from the lecture can help solve problem 2 of week 3 in Real Analysis? How should I start the proof?
 Provide a reference to the definition of a Cauchy sequence.
 What theorem guarantees that every convergent sequence is bounded?
 Wie beweist man den Mittelwertsatz?
@@ -8,3 +9,6 @@ Which exercises in Real Analysis involve epsilon-delta proofs?
 Was sind die Aufgaben der 2. Übung in Analysis I?
 Erkläre den Begriff der gleichmäßigen Stetigkeit aus Analysis I.
 What concepts from Analysis I overlap with Real Analysis?
+Welche Konzepte aus der Real Analysis tauchen in der Analysis I auf?
+Why are convergent sequences bounded?
+Which different compactness concepts are introduced in Real Analysis?
