@@ -11,7 +11,7 @@ dev:
   vector_search_endpoint: llmops_course_vs_endpoint
   genie_space_id: 01f12d424a8b1053914d68efa80eace5
   usage_policy_id: 686c435d-90af-4c40-9ca4-442d4a3d8899
-  lakebase_project_id: learning-buddy-lakebase
+  lakebase_project_id: learning-buddy
   experiment_name: /Shared/llmops-jankoch8-learning-buddy
   courses_path: learning_buddy_courses.yml
 
@@ -26,7 +26,7 @@ acc:
   vector_search_endpoint: llmops_course_vs_endpoint
   genie_space_id: 01f12d424a8b1053914d68efa80eace5
   usage_policy_id: 686c435d-90af-4c40-9ca4-442d4a3d8899
-  lakebase_project_id: learning-buddy-lakebase
+  lakebase_project_id: learning-buddy
   experiment_name: /Shared/llmops-jankoch8-learning-buddy
   courses_path: learning_buddy_courses.yml
 
@@ -41,7 +41,7 @@ prd:
   vector_search_endpoint: llmops_course_vs_endpoint
   genie_space_id: 01f12d424a8b1053914d68efa80eace5
   usage_policy_id: 686c435d-90af-4c40-9ca4-442d4a3d8899
-  lakebase_project_id: learning-buddy-lakebase
+  lakebase_project_id: learning-buddy
   experiment_name: /Shared/llmops-jankoch8-learning-buddy
   courses_path: learning_buddy_courses.yml
 
