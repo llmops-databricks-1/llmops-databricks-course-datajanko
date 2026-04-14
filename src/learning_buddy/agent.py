@@ -29,9 +29,9 @@ from mlflow.types.responses import (
     to_chat_completions_input,
 )
 
-from arxiv_curator.memory import LakebaseMemory
 from commons.config import ProjectConfig
 from commons.mcp import ToolInfo
+from commons.memory import LakebaseMemory
 from learning_buddy.vector_search import LearningBuddyVectorSearchManager
 
 # ---------------------------------------------------------------------------

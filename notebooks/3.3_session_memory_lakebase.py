@@ -119,7 +119,7 @@ with psycopg.connect(conn_string) as conn:
 
 # COMMAND ----------
 
-from arxiv_curator.memory import LakebaseMemory
+from commons.memory import LakebaseMemory
 
 memory = LakebaseMemory(
     project_id=project_id,

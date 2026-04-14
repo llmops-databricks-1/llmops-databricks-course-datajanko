@@ -7,8 +7,8 @@ from databricks.sdk.service.postgres import PostgresAPI
 from loguru import logger
 from pyspark.sql import SparkSession
 
-from arxiv_curator.memory import LakebaseMemory
 from commons.config import get_env, load_config
+from commons.memory import LakebaseMemory
 
 spark = SparkSession.builder.getOrCreate()
 cfg = load_config("arxiv_config.yml", get_env(spark))

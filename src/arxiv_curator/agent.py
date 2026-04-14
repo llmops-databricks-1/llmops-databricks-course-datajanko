@@ -32,8 +32,8 @@ from mlflow.types.responses import (
 )
 
 from arxiv_curator.mcp import create_mcp_tools
-from arxiv_curator.memory import LakebaseMemory
 from commons.config import ProjectConfig
+from commons.memory import LakebaseMemory
 
 
 class ArxivAgent(ResponsesAgent):
