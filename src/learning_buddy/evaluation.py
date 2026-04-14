@@ -1,6 +1,9 @@
 """Evaluation module for the Learning Buddy agent."""
 
+from typing import Literal
+
 import mlflow
+from mlflow.genai.judges import make_judge
 from mlflow.genai.scorers import Guidelines
 
 from commons.config import ProjectConfig
@@ -110,6 +113,58 @@ def response_not_too_long(outputs: object) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Judges (LLM-as-judge with scored / categorical output)
+# ---------------------------------------------------------------------------
+
+_JUDGE_MODEL = "databricks:/databricks-gpt-oss-120b"
+
+relevance_judge = make_judge(
+    name="answer_relevance",
+    instructions=(
+        "Evaluate how relevant the response in {{ outputs }} is to the homework or lecture "
+        "question in {{ inputs }}.\n"
+        "Score from 1 to 5:\n"
+        "1 - Completely off-topic or does not address the question at all\n"
+        "2 - Tangentially related but missing the core of the question\n"
+        "3 - Partially answers the question but lacks key details\n"
+        "4 - Clearly relevant and addresses the main question\n"
+        "5 - Directly and completely answers the question with appropriate course context"
+    ),
+    model=_JUDGE_MODEL,
+    feedback_value_type=int,
+)
+
+source_quality_judge = make_judge(
+    name="source_citation_quality",
+    instructions=(
+        "Evaluate how well the response in {{ outputs }} cites and contextualises sources "
+        "from the course material in response to the question in {{ inputs }}.\n"
+        "Score from 1 to 5:\n"
+        "1 - No sources or material references at all\n"
+        "2 - Vague mention of sources without useful detail\n"
+        "3 - References course material but without week, problem, or section specifics\n"
+        "4 - Cites specific material (e.g. week number, problem set, lecture section)\n"
+        "5 - Precise citations that directly help the student locate the relevant material"
+    ),
+    model=_JUDGE_MODEL,
+    feedback_value_type=int,
+)
+
+language_appropriateness_judge = make_judge(
+    name="language_appropriateness",
+    instructions=(
+        "Determine whether the language of the response in {{ outputs }} matches the language "
+        "of the user's question in {{ inputs }}. "
+        "Classify as 'correct' if the response is in the same language as the question, "
+        "'mixed' if the response switches languages mid-answer, "
+        "or 'incorrect' if the response is entirely in a different language than the question."
+    ),
+    model=_JUDGE_MODEL,
+    feedback_value_type=Literal["correct", "mixed", "incorrect"],
+)
+
+
+# ---------------------------------------------------------------------------
 # evaluate_agent
 # ---------------------------------------------------------------------------
 
@@ -159,6 +214,9 @@ def evaluate_agent(
             stays_in_course_scope,
             cites_sources,
             response_not_too_long,
+            relevance_judge,
+            source_quality_judge,
+            language_appropriateness_judge,
         ],
     )
 
