@@ -1,9 +1,9 @@
 resources:
   jobs:
     register_deploy_agent:
-      name: arxiv-agent-register-deploy-pipeline
+      name: learning-buddy-register-deploy-pipeline
       tags:
-        project_name: "arxiv-curator"
+        project_name: "learning-buddy"
         environment: ${bundle.target}
       environments:
         - environment_key: default
