@@ -1,0 +1,22 @@
+resources:
+  jobs:
+    setup_lakebase_job:
+      name: setup_lakebase
+      tags:
+        project_name: "llmops-databricks-course-datajanko"
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+
+      tasks:
+        - task_key: setup_lakebase
+          environment_key: default
+          notebook_task:
+            notebook_path: ../notebooks/deployment_scripts/setup_lakebase.py
+            base_parameters:
+              config_path: ../learning_buddy_config.yml
+              env: ${bundle.target}

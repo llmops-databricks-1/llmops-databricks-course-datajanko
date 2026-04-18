@@ -45,7 +45,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.functions import col
 
-from arxiv_curator.config import get_env, load_config
+from commons.config import get_env, load_config
 
 # COMMAND ----------
 

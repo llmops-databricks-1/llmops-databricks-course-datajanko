@@ -22,7 +22,7 @@ from google.protobuf.duration_pb2 import Duration
 from loguru import logger
 from pyspark.sql import SparkSession
 
-from arxiv_curator.config import get_env, load_config
+from commons.config import get_env, load_config
 
 spark = SparkSession.builder.getOrCreate()
 cfg = load_config("arxiv_config.yml", get_env(spark))
@@ -119,7 +119,7 @@ with psycopg.connect(conn_string) as conn:
 
 # COMMAND ----------
 
-from arxiv_curator.memory import LakebaseMemory
+from commons.memory import LakebaseMemory
 
 memory = LakebaseMemory(
     project_id=project_id,

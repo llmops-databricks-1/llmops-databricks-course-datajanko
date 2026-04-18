@@ -6,7 +6,7 @@ from databricks.sdk import WorkspaceClient
 from databricks.vector_search.client import VectorSearchClient
 from loguru import logger
 
-from arxiv_curator.config import ProjectConfig
+from commons.config import ProjectConfig
 
 
 class VectorSearchManager:

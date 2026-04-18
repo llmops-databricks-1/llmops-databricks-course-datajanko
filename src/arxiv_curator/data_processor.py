@@ -28,7 +28,7 @@ from pyspark.sql.functions import (
 )
 from pyspark.sql.types import ArrayType, StringType, StructField, StructType
 
-from arxiv_curator.config import ProjectConfig
+from commons.config import ProjectConfig
 
 
 class DataProcessor:
