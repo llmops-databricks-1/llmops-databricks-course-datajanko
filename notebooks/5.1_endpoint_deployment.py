@@ -16,11 +16,14 @@
 import os
 
 import mlflow
-from arxiv_curator.config import ProjectConfig
 from databricks import agents
 from databricks.sdk import WorkspaceClient
 from loguru import logger
 from mlflow import MlflowClient
+from pyspark.sql import SparkSession
+
+from commons.config import get_env
+from learning_buddy.config import LearningBuddyProjectConfig
 
 # Setup MLflow tracking
 if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
@@ -31,11 +34,13 @@ if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
     mlflow.set_tracking_uri(f"databricks://{profile}")
     mlflow.set_registry_uri(f"databricks-uc://{profile}")
 
-cfg = ProjectConfig.from_yaml("../project_config.yml")
+spark = SparkSession.builder.getOrCreate()
+env = get_env(spark)
+cfg = LearningBuddyProjectConfig.load("../learning_buddy_config.yml", env)
 
-model_name = f"{cfg.catalog}.{cfg.schema}.arxiv_agent"
-endpoint_name = "arxiv-agent-endpoint-dev-course"
-secret_scope = "arxiv-agent-scope"
+model_name = f"{cfg.catalog}.{cfg.schema}.learning_buddy_agent"
+endpoint_name = "learning-buddy-endpoint"
+secret_scope = "dev_SPN"
 
 model_version = MlflowClient().get_model_version_by_alias(model_name, "latest-model").version
 
@@ -70,8 +75,8 @@ agents.deploy(
         "MODEL_VERSION": model_version,
         "MODEL_SERVING_ENDPOINT_NAME": endpoint_name,
         "MLFLOW_EXPERIMENT_ID": experiment.experiment_id,
-        "LAKEBASE_SP_CLIENT_ID": f"{{secrets/{secret_scope}/client-id}}",
-        "LAKEBASE_SP_CLIENT_SECRET": f"{{secrets/{secret_scope}/client-secret}}",
+        "LAKEBASE_SP_CLIENT_ID": f"{{secrets/{secret_scope}/client_id}}",
+        "LAKEBASE_SP_CLIENT_SECRET": f"{{secrets/{secret_scope}/client_secret}}",
         "LAKEBASE_SP_HOST": WorkspaceClient().config.host,
     },
 )
@@ -104,7 +109,7 @@ request_id = f"req-{timestamp}-{random.randint(100000, 999999)}"
 
 response = client.responses.create(
     model=endpoint_name,
-    input=[{"role": "user", "content": "What are recent papers about LLMs and reasoning?"}],
+    input=[{"role": "user", "content": "What are the exercises of week 3 for Real Analysis?"}],
     extra_body={
         "custom_inputs": {
             "session_id": session_id,
