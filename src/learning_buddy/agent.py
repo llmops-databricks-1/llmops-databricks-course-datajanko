@@ -29,9 +29,9 @@ from mlflow.types.responses import (
     to_chat_completions_input,
 )
 
-from commons.config import ProjectConfig
 from commons.mcp import ToolInfo
 from commons.memory import LakebaseMemory
+from learning_buddy.config import LearningBuddyProjectConfig
 from learning_buddy.vector_search import LearningBuddyVectorSearchManager
 
 # ---------------------------------------------------------------------------
@@ -474,7 +474,7 @@ class LearningBuddyAgent(ResponsesAgent):
 
 
 def log_register_agent(
-    cfg: ProjectConfig,
+    cfg: LearningBuddyProjectConfig,
     git_sha: str,
     run_id: str,
     agent_code_path: str,
@@ -503,7 +503,7 @@ def log_register_agent(
     model_config = {
         "catalog": cfg.catalog,
         "schema": cfg.schema,
-        "system_prompt": SYSTEM_PROMPT,
+        "system_prompt": cfg.system_prompt,
         "llm_endpoint": cfg.llm_endpoint,
         "embedding_endpoint": cfg.embedding_endpoint,
         "vector_search_endpoint": cfg.vector_search_endpoint,

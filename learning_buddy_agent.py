@@ -1,13 +1,13 @@
 import mlflow
 from mlflow.models import ModelConfig
 
-from learning_buddy.agent import SYSTEM_PROMPT, LearningBuddyAgent
+from learning_buddy.agent import LearningBuddyAgent
 
 config = ModelConfig(
     development_config={
         "catalog": "mlops_dev",
         "schema": "jankoch8",
-        "system_prompt": SYSTEM_PROMPT,
+        "system_prompt": "placeholder",
         "llm_endpoint": "databricks-llama-4-maverick",
         "embedding_endpoint": "databricks-gte-large-en",
         "vector_search_endpoint": "llmops_course_vs_endpoint",

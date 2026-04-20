@@ -61,7 +61,11 @@ class ProjectConfig(BaseModel):
         if env not in config_data:
             raise ValueError(f"Environment '{env}' not found in config file")
 
-        return cls(**config_data[env])
+        env_config = config_data[env]
+        if "system_prompt" in config_data:
+            env_config["system_prompt"] = config_data["system_prompt"]
+
+        return cls(**env_config)
 
     @classmethod
     def load(cls, config_path: str = "project_config.yml", env: str = "dev") -> "ProjectConfig":
