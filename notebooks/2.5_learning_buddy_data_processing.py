@@ -70,7 +70,13 @@ print(f"Remaining unprocessed documents: {unprocessed}")
 
 # COMMAND ----------
 
-searcher = LearningBuddyVectorSearchManager(cfg)
+searcher = LearningBuddyVectorSearchManager(
+    catalog=cfg.catalog,
+    schema=cfg.schema,
+    vector_search_endpoint=cfg.vector_search_endpoint,
+    embedding_endpoint=cfg.embedding_endpoint,
+    usage_policy_id=cfg.usage_policy_id,
+)
 searcher.create_endpoint_if_not_exists()
 searcher.create_or_get_index()
 searcher.sync()

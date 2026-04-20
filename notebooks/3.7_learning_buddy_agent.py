@@ -58,7 +58,13 @@ logger.info(f"✓ Vector search endpoint: {cfg.vector_search_endpoint}")
 
 from learning_buddy.vector_search import LearningBuddyVectorSearchManager
 
-vs_manager = LearningBuddyVectorSearchManager(config=cfg)
+vs_manager = LearningBuddyVectorSearchManager(
+    catalog=cfg.catalog,
+    schema=cfg.schema,
+    vector_search_endpoint=cfg.vector_search_endpoint,
+    embedding_endpoint=cfg.embedding_endpoint,
+    usage_policy_id=cfg.usage_policy_id,
+)
 
 logger.info(f"✓ Vector Search Index: {vs_manager.index_name}")
 

@@ -165,24 +165,33 @@ class LearningBuddyAgent(ResponsesAgent):
 
     def __init__(
         self,
-        config: ProjectConfig,
-        system_prompt: str | None = None,
+        llm_endpoint: str,
+        system_prompt: str,
+        catalog: str,
+        schema: str,
+        vector_search_endpoint: str,
+        embedding_endpoint: str,
+        usage_policy_id: str,
         lakebase_project_id: str | None = None,
     ) -> None:
         nest_asyncio.apply()
 
-        self.system_prompt = system_prompt or SYSTEM_PROMPT
-        self.llm_endpoint = config.llm_endpoint
+        self.system_prompt = system_prompt
+        self.llm_endpoint = llm_endpoint
         self.workspace_client = WorkspaceClient()
         self.model_serving_client = self.workspace_client.serving_endpoints.get_open_ai_client()
 
-        self._vs_manager = LearningBuddyVectorSearchManager(config=config)
+        self._vs_manager = LearningBuddyVectorSearchManager(
+            catalog=catalog,
+            schema=schema,
+            vector_search_endpoint=vector_search_endpoint,
+            embedding_endpoint=embedding_endpoint,
+            usage_policy_id=usage_policy_id,
+        )
 
-        # Use explicit lakebase_project_id if given, fall back to config
-        project_id = lakebase_project_id or getattr(config, "lakebase_project_id", None)
         self.memory: LakebaseMemory | None = None
-        if project_id:
-            self.memory = LakebaseMemory(project_id=project_id)
+        if lakebase_project_id:
+            self.memory = LakebaseMemory(project_id=lakebase_project_id)
 
         self._tools_dict = {tool.name: tool for tool in self._build_tools()}
 
@@ -496,6 +505,9 @@ def log_register_agent(
         "schema": cfg.schema,
         "system_prompt": SYSTEM_PROMPT,
         "llm_endpoint": cfg.llm_endpoint,
+        "embedding_endpoint": cfg.embedding_endpoint,
+        "vector_search_endpoint": cfg.vector_search_endpoint,
+        "usage_policy_id": cfg.usage_policy_id,
         "lakebase_project_id": cfg.lakebase_project_id,
     }
 

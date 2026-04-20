@@ -57,7 +57,16 @@ logger.info(f"✓ Experiment: {cfg.experiment_name}")
 
 from learning_buddy.agent import LearningBuddyAgent
 
-agent = LearningBuddyAgent(config=cfg)
+agent = LearningBuddyAgent(
+    llm_endpoint=cfg.llm_endpoint,
+    system_prompt=cfg.system_prompt,
+    catalog=cfg.catalog,
+    schema=cfg.schema,
+    vector_search_endpoint=cfg.vector_search_endpoint,
+    embedding_endpoint=cfg.embedding_endpoint,
+    usage_policy_id=cfg.usage_policy_id,
+    lakebase_project_id=cfg.lakebase_project_id,
+)
 
 logger.info("✓ LearningBuddyAgent initialised")
 logger.info(f"  Tools: {list(agent._tools_dict.keys())}")

@@ -49,7 +49,13 @@ processor.run()
 
 # COMMAND ----------
 
-searcher = LearningBuddyVectorSearchManager(config=cfg)
+searcher = LearningBuddyVectorSearchManager(
+    catalog=cfg.catalog,
+    schema=cfg.schema,
+    vector_search_endpoint=cfg.vector_search_endpoint,
+    embedding_endpoint=cfg.embedding_endpoint,
+    usage_policy_id=cfg.usage_policy_id,
+)
 searcher.sync()
 
 logger.info("✓ Learning Buddy data processing pipeline complete!")

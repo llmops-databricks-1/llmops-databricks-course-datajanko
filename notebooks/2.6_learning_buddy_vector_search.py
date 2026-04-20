@@ -18,7 +18,13 @@ schema = cfg.schema
 
 # COMMAND ----------
 
-vs_manager = LearningBuddyVectorSearchManager(config=cfg)
+vs_manager = LearningBuddyVectorSearchManager(
+    catalog=cfg.catalog,
+    schema=cfg.schema,
+    vector_search_endpoint=cfg.vector_search_endpoint,
+    embedding_endpoint=cfg.embedding_endpoint,
+    usage_policy_id=cfg.usage_policy_id,
+)
 
 logger.info(f"Vector Search Endpoint: {vs_manager.endpoint_name}")
 logger.info(f"Embedding Model: {vs_manager.embedding_model}")
