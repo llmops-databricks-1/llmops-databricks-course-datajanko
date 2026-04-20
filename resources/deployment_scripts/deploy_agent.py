@@ -12,14 +12,14 @@ from learning_buddy.config import LearningBuddyProjectConfig
 # Get parameters (passed via base_parameters in job YAML)
 git_sha = dbutils.widgets.get("git_sha")
 env = dbutils.widgets.get("env")
-secret_scope = "arxiv-agent-scope"
+secret_scope = f"{env}_SPN"
 
 # Load configuration
 cfg = LearningBuddyProjectConfig.load(config_path="learning_buddy_config.yml", env=env)
 
 # Get model details
 model_name = f"{cfg.catalog}.{cfg.schema}.learning_buddy_agent"
-endpoint_name = f"arxiv-agent-endpoint-{env}-course"
+endpoint_name = f"learning_buddy_endpoint_{env}"
 
 client = MlflowClient()
 model_version = client.get_model_version_by_alias(model_name, "latest-model").version
