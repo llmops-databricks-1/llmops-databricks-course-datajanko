@@ -1,5 +1,5 @@
 [project]
-name = "llmops-databricks-course-datajanko"
+name = "learning-buddy"
 dynamic = ["version"]
 description = "llmops-databricks-course-datajanko - LLMOps Course on Databricks"
 requires-python = ">=3.12, <3.13"

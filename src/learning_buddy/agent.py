@@ -2,8 +2,9 @@
 
 import json
 import os
+import urllib.parse
 import warnings
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from datetime import datetime
 from typing import Any
 from uuid import uuid4
@@ -12,7 +13,9 @@ import backoff
 import mlflow
 import nest_asyncio
 import openai
+import psycopg
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.postgres import PostgresAPI
 from loguru import logger
 from mlflow import MlflowClient
 from mlflow.entities import SpanType
@@ -28,11 +31,102 @@ from mlflow.types.responses import (
     output_to_responses_items_stream,
     to_chat_completions_input,
 )
+from psycopg_pool import ConnectionPool
+from pydantic import BaseModel
 
-from commons.mcp import ToolInfo
-from commons.memory import LakebaseMemory
 from learning_buddy.config import LearningBuddyProjectConfig
 from learning_buddy.vector_search import LearningBuddyVectorSearchManager
+
+# ---------------------------------------------------------------------------
+# Inlined from commons.mcp
+# ---------------------------------------------------------------------------
+
+
+class ToolInfo(BaseModel):
+    """Tool information for agent integration."""
+
+    name: str
+    spec: dict
+    exec_fn: Callable
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+# ---------------------------------------------------------------------------
+# Inlined from commons.memory
+# ---------------------------------------------------------------------------
+
+
+class LakebaseMemory:
+    """Handles session message persistence using Lakebase (PostgreSQL)."""
+
+    def __init__(self, project_id: str) -> None:
+        self.project_id = project_id
+        self._pool: ConnectionPool | None = None
+
+    def _get_connection_string(self) -> str:
+        client_id = os.environ.get("LAKEBASE_SP_CLIENT_ID")
+        client_secret = os.environ.get("LAKEBASE_SP_CLIENT_SECRET")
+        host = os.environ.get("LAKEBASE_SP_HOST")
+
+        w = WorkspaceClient(host=host, client_id=client_id, client_secret=client_secret) if client_id and client_secret and host else WorkspaceClient()
+
+        pg_api = PostgresAPI(w.api_client)
+
+        if client_id:
+            username = client_id
+        else:
+            user = w.current_user.me()
+            username = urllib.parse.quote_plus(user.user_name)
+
+        project_parent = f"projects/{self.project_id}"
+        default_branch = next(iter(pg_api.list_branches(parent=project_parent)))
+        endpoint = next(iter(pg_api.list_endpoints(parent=default_branch.name)))
+        host = endpoint.status.hosts.host
+        pg_credential = pg_api.generate_database_credential(endpoint=endpoint.name)
+
+        return f"postgresql://{username}:{pg_credential.token}@{host}:5432/databricks_postgres?sslmode=require"
+
+    def _get_pool(self) -> ConnectionPool:
+        if self._pool is None:
+            self._pool = ConnectionPool(conninfo=self._get_connection_string(), min_size=1, max_size=5)
+        return self._pool
+
+    def _reset_pool(self) -> None:
+        if self._pool is not None:
+            self._pool.close()
+            self._pool = None
+
+    def load_messages(self, session_id: str) -> list[dict[str, Any]]:
+        try:
+            with self._get_pool().connection() as conn:
+                result = conn.execute(
+                    "SELECT message_data FROM session_messages WHERE session_id = %s ORDER BY created_at ASC",
+                    (session_id,),
+                ).fetchall()
+                return [row[0] for row in result]
+        except psycopg.OperationalError:
+            self._reset_pool()
+            raise
+        except Exception as e:
+            logger.warning(f"Failed to load session messages: {e}")
+            return []
+
+    def save_messages(self, session_id: str, messages: list[dict[str, Any]]) -> None:
+        try:
+            with self._get_pool().connection() as conn:
+                for msg in messages:
+                    conn.execute(
+                        "INSERT INTO session_messages (session_id, message_data) VALUES (%s, %s)",
+                        (session_id, json.dumps(msg)),
+                    )
+        except psycopg.OperationalError:
+            self._reset_pool()
+            raise
+        except Exception as e:
+            logger.warning(f"Failed to save session messages: {e}")
+
 
 # ---------------------------------------------------------------------------
 # System prompt
