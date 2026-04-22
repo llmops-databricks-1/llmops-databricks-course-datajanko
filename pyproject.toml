@@ -1,5 +1,5 @@
 [project]
-name = "learning-buddy"
+name = "llmops-databricks-course-datajanko"
 dynamic = ["version"]
 description = "llmops-databricks-course-datajanko - LLMOps Course on Databricks"
 requires-python = ">=3.12, <3.13"
@@ -43,7 +43,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["learning_buddy*"]
+include = ["commons*", "arxiv_curator*", "learning_buddy*"]
 
 [tool.setuptools.dynamic]
 version = { file = "version.txt" }
