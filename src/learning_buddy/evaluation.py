@@ -182,7 +182,16 @@ def evaluate_agent(
     Returns:
         MLflow EvaluationResult with scores for all scorers.
     """
-    agent = LearningBuddyAgent(config=cfg)
+    agent = LearningBuddyAgent(
+        llm_endpoint=cfg.llm_endpoint,
+        system_prompt=cfg.system_prompt,
+        catalog=cfg.catalog,
+        schema=cfg.schema,
+        vector_search_endpoint=cfg.vector_search_endpoint,
+        embedding_endpoint=cfg.embedding_endpoint,
+        usage_policy_id=cfg.usage_policy_id,
+        lakebase_project_id=cfg.lakebase_project_id,
+    )
 
     with open(eval_inputs_path) as f:
         eval_data = [{"inputs": {"question": line.strip()}} for line in f if line.strip()]

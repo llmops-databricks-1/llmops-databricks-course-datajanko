@@ -6,8 +6,6 @@ from databricks.sdk import WorkspaceClient
 from databricks.vector_search.client import VectorSearchClient
 from loguru import logger
 
-from commons.config import ProjectConfig
-
 
 class LearningBuddyVectorSearchManager:
     """Manages vector search endpoint and index for learning materials.
@@ -19,17 +17,19 @@ class LearningBuddyVectorSearchManager:
     Source: learning_materials_chunks (primary key: chunk_id, embedding column: text)
     """
 
-    def __init__(self, config: ProjectConfig) -> None:
-        """Initialize with project configuration.
-
-        Args:
-            config: ProjectConfig with catalog, schema, endpoint settings
-        """
-        self.cfg = config
-        self.catalog = config.catalog
-        self.schema = config.schema
-        self.endpoint_name = config.vector_search_endpoint
-        self.embedding_model = config.embedding_endpoint
+    def __init__(
+        self,
+        catalog: str,
+        schema: str,
+        vector_search_endpoint: str,
+        embedding_endpoint: str,
+        usage_policy_id: str,
+    ) -> None:
+        self.catalog = catalog
+        self.schema = schema
+        self.endpoint_name = vector_search_endpoint
+        self.embedding_model = embedding_endpoint
+        self.usage_policy_id = usage_policy_id
 
         w = WorkspaceClient()
         self.client = VectorSearchClient(
@@ -47,7 +47,7 @@ class LearningBuddyVectorSearchManager:
 
         if not endpoint_exists:
             logger.info(f"Creating vector search endpoint: {self.endpoint_name}")
-            self.client.create_endpoint_and_wait(name=self.endpoint_name, endpoint_type="STANDARD", usage_policy_id=self.cfg.usage_policy_id)
+            self.client.create_endpoint_and_wait(name=self.endpoint_name, endpoint_type="STANDARD", usage_policy_id=self.usage_policy_id)
             logger.info(f"✓ Vector search endpoint created: {self.endpoint_name}")
         else:
             logger.info(f"✓ Vector search endpoint exists: {self.endpoint_name}")
@@ -76,7 +76,7 @@ class LearningBuddyVectorSearchManager:
                 primary_key="chunk_id",
                 embedding_source_column="text",
                 embedding_model_endpoint_name=self.embedding_model,
-                usage_policy_id=self.cfg.usage_policy_id,
+                usage_policy_id=self.usage_policy_id,
             )
             logger.info(f"✓ Vector search index created: {self.index_name}")
             return index

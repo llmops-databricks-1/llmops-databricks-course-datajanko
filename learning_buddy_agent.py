@@ -1,36 +1,29 @@
 import mlflow
 from mlflow.models import ModelConfig
 
-from commons.config import ProjectConfig
-from learning_buddy.agent import LearningBuddyAgent
+from learning_buddy.agent import SYSTEM_PROMPT, LearningBuddyAgent
 
 config = ModelConfig(
     development_config={
         "catalog": "mlops_dev",
-        "schema": "learning_buddy",
-        "system_prompt": "placeholder",
-        "llm_endpoint": "databricks-gpt-oss-120b",
-        "lakebase_project_id": "learning-buddy-lakebase",
+        "schema": "jankoch8",
+        "system_prompt": SYSTEM_PROMPT,
+        "llm_endpoint": "databricks-llama-4-maverick",
+        "embedding_endpoint": "databricks-gte-large-en",
+        "vector_search_endpoint": "llmops_course_vs_endpoint",
+        "usage_policy_id": "a97cfff0-17de-4bb0-8774-671911359995",
+        "lakebase_project_id": "learning-buddy",
     }
 )
 
-cfg = ProjectConfig(
+agent = LearningBuddyAgent(
+    llm_endpoint=config.get("llm_endpoint"),
+    system_prompt=config.get("system_prompt"),
     catalog=config.get("catalog"),
     schema=config.get("schema"),
-    volume="learning_materials",
-    llm_endpoint=config.get("llm_endpoint"),
-    embedding_endpoint="databricks-bge-large-en",
-    warehouse_id="",
-    vector_search_endpoint="learning-buddy-vs",
-    usage_policy_id="",
-    lakebase_project_id=config.get("lakebase_project_id"),
-    experiment_name="/Shared/llmops-learning-buddy",
-    system_prompt=config.get("system_prompt"),
-)
-
-agent = LearningBuddyAgent(
-    config=cfg,
-    system_prompt=config.get("system_prompt"),
+    vector_search_endpoint=config.get("vector_search_endpoint"),
+    embedding_endpoint=config.get("embedding_endpoint"),
+    usage_policy_id=config.get("usage_policy_id"),
     lakebase_project_id=config.get("lakebase_project_id"),
 )
 mlflow.models.set_model(agent)
