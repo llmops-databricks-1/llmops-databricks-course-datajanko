@@ -6,8 +6,8 @@ import mlflow
 from mlflow.genai.judges import make_judge
 from mlflow.genai.scorers import Guidelines
 
-from commons.config import ProjectConfig
 from learning_buddy.agent import LearningBuddyAgent
+from learning_buddy.config import LearningBuddyProjectConfig as ProjectConfig
 
 # ---------------------------------------------------------------------------
 # Guidelines scorers (LLM-as-judge)

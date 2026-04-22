@@ -30,8 +30,7 @@ from loguru import logger
 from mlflow.types.responses import ResponsesAgentRequest
 from pyspark.sql import SparkSession
 
-from commons.config import get_env
-from learning_buddy.config import LearningBuddyProjectConfig
+from learning_buddy.config import LearningBuddyProjectConfig, get_env
 
 # Local (non-Databricks) setup: load .env and set MLflow tracking URI
 if "DATABRICKS_RUNTIME_VERSION" not in os.environ:

@@ -614,9 +614,35 @@ def log_register_agent(
         run_name=f"learning-buddy-agent-{ts}",
         tags={"git_sha": git_sha, "run_id": run_id},
     ):
+        # Explicitly list pip requirements to prevent MLflow from auto-inferring
+        # 'learning-buddy' (not on PyPI). The package source is captured via
+        # infer_code_paths=True, which bundles the local .py files into the artifact.
+        pip_requirements = [
+            "cffi==2.0.0",
+            "cloudpickle==3.1.2",
+            "numpy==2.4.3",
+            "pandas==2.2.3",
+            "pyarrow==23.0.1",
+            "databricks-sdk==0.101.0",
+            "pydantic==2.12.5",
+            "loguru==0.7.3",
+            "python-dotenv==1.2.2",
+            "databricks-vectorsearch==0.66",
+            "openai==2.29.0",
+            "databricks-mcp==0.9.0",
+            "backoff==2.2.1",
+            "mlflow==3.10.1",
+            "nest-asyncio==1.6.0",
+            "arxiv==2.4.1",
+            "databricks-agents==1.9.3",
+            "psycopg==3.3.3",
+            "psycopg-pool==3.3.0",
+            "psycopg[binary]==3.3.3",
+        ]
         model_info = mlflow.pyfunc.log_model(
             name="agent",
             python_model=agent_code_path,
+            pip_requirements=pip_requirements,
             resources=resources,
             input_example=test_request,
             model_config=model_config,

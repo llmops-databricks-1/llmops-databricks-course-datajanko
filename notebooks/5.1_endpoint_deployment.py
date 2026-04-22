@@ -22,8 +22,7 @@ from loguru import logger
 from mlflow import MlflowClient
 from pyspark.sql import SparkSession
 
-from commons.config import get_env
-from learning_buddy.config import LearningBuddyProjectConfig
+from learning_buddy.config import LearningBuddyProjectConfig, get_env
 
 # Setup MLflow tracking
 if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
